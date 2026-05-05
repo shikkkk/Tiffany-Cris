@@ -718,7 +718,7 @@ function WishlistPage({ user, wishlistIds, setPage, onWishlistToggle, onViewingR
               <div className="product-card" key={bag.id} onClick={() => setModal(bag)}>
                 <div className="pc-img">
                   <div className="pc-img-inner" style={bag.img ? { backgroundImage: `url(${bag.img})` } : {}} />
-                  <button className="pc-wish-btn on" onClick={e => { e.stopPropagation(); onWishlistToggle(bag.id); }}>&#9829;</button>
+                  <button className="pc-wish-btn on" onClick={e => { e.stopPropagation(); onWishlistToggle(bag.id); }}>♥</button>
                 </div>
                 <div className="pc-info">
                   <div className="pc-cat">{bag.cat}</div>
@@ -733,7 +733,7 @@ function WishlistPage({ user, wishlistIds, setPage, onWishlistToggle, onViewingR
       <div className={`modal-bg${modal ? " open" : ""}`} onClick={e => { if (e.target.classList.contains("modal-bg")) setModal(null); }}>
         {modal && (
           <div className="modal-box">
-            <button className="modal-close-btn" onClick={() => setModal(null)}>&#10005; Close</button>
+            <button className="modal-close-btn" onClick={() => setModal(null)}>✕ Close</button>
             <div className="modal-img-side" style={modal.img ? { backgroundImage: `url(${modal.img})` } : {}} />
             <div className="modal-info-side">
               <div>
@@ -749,7 +749,7 @@ function WishlistPage({ user, wishlistIds, setPage, onWishlistToggle, onViewingR
                 </div>
               </div>
               <div>
-                <button className="modal-btn-primary" onClick={() => { onWishlistToggle(modal.id); setModal(null); }}>&#9829; Remove from Wishlist</button>
+                <button className="modal-btn-primary" onClick={() => { onWishlistToggle(modal.id); setModal(null); }}>♥ Remove from Wishlist</button>
                 <button className="modal-btn-ghost" onClick={() => { onViewingRequest(modal); setModal(null); }}>Request Private Viewing</button>
               </div>
             </div>
@@ -832,7 +832,7 @@ function Collection({ user, wishlistIds, onWishlistToggle, onViewingRequest, onA
                   onClick={e => { e.stopPropagation(); onWishlistToggle ? onWishlistToggle(bag.id) : onAuthRequired?.(); }}
                   title={inWishlist(bag.id) ? "Remove from wishlist" : "Add to wishlist"}
                 >
-                  {inWishlist(bag.id) ? "&#9829;" : "&#9825;"}
+                  {inWishlist(bag.id) ? "♥" : "♡"}
                 </button>
               </div>
               <div className="pc-info">
@@ -847,7 +847,7 @@ function Collection({ user, wishlistIds, onWishlistToggle, onViewingRequest, onA
       <div className={`modal-bg${modal ? " open" : ""}`} onClick={e => { if (e.target.classList.contains("modal-bg")) setModal(null); }}>
         {modal && (
           <div className="modal-box">
-            <button className="modal-close-btn" onClick={() => setModal(null)}>&#10005; Close</button>
+            <button className="modal-close-btn" onClick={() => setModal(null)}>✕ Close</button>
             <div className="modal-img-side" style={modal.img ? { backgroundImage: `url(${modal.img})` } : {}}>
               {!modal.img && bagSvgs[modal.id]}
             </div>
@@ -867,7 +867,7 @@ function Collection({ user, wishlistIds, onWishlistToggle, onViewingRequest, onA
               </div>
               <div>
                 <button className="modal-btn-primary" onClick={() => onWishlistToggle ? onWishlistToggle(modal.id) : onAuthRequired?.()}>
-                  {inWishlist(modal.id) ? "&#9829; Saved to Wishlist" : "&#9825; Add to Wishlist"}
+                  {inWishlist(modal.id) ? "♥ Saved to Wishlist" : "♡ Add to Wishlist"}
                 </button>
                 <button className="modal-btn-ghost" onClick={() => { onViewingRequest ? onViewingRequest(modal) : onAuthRequired?.(); setModal(null); }}>
                   Request Private Viewing
@@ -1028,9 +1028,21 @@ export default function App() {
   const isAdmin = window.location.search.includes("admin");
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => setUser(session?.user ?? null));
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
-      setUser(session?.user ?? null);
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      const u = session?.user ?? null;
+      setUser(u);
+      if (u) {
+        const { data } = await supabase.from("Users").select("is_admin").eq("email", u.email).maybeSingle();
+        if (data?.is_admin) { window.location.href = "/?admin"; }
+      }
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const u = session?.user ?? null;
+      setUser(u);
+      if (event === "SIGNED_IN" && u) {
+        const { data } = await supabase.from("Users").select("is_admin").eq("email", u.email).maybeSingle();
+        if (data?.is_admin) { window.location.href = "/?admin"; }
+      }
     });
     return () => subscription.unsubscribe();
   }, []);

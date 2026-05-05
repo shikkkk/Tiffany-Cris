@@ -261,9 +261,17 @@ function LoginScreen({ onExit }) {
     setErr(""); setSuccess(""); setLoading(true);
     if (mode === "signup") {
       if (password !== confirm) { setErr("Passwords do not match."); setLoading(false); return; }
-      const { error } = await supabase.auth.signUp({ email, password });
+      const { data: signUpData, error } = await supabase.auth.signUp({ email, password });
       if (error) setErr(error.message);
-      else setSuccess("Account created! You can now sign in.");
+      else {
+        if (signUpData.user) {
+          await supabase.from("Users").upsert(
+            [{ id: signUpData.user.id, email, is_admin: true, created_at: new Date().toISOString() }],
+            { onConflict: "id" }
+          );
+        }
+        setSuccess("Account created! You can now sign in.");
+      }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) setErr(error.message);
@@ -678,6 +686,7 @@ function UsersPanel() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [err, setErr] = useState(null);
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     supabase.from("Users").select("*").order("created_at", { ascending: false })
@@ -688,48 +697,79 @@ function UsersPanel() {
       });
   }, []);
 
+  async function toggleAdmin(u) {
+    const next = !u.is_admin;
+    await supabase.from("Users").update({ is_admin: next }).eq("id", u.id);
+    setUsers(prev => prev.map(x => x.id === u.id ? { ...x, is_admin: next } : x));
+    setToast(`${u.email} is now ${next ? "Admin" : "Customer"}`);
+  }
+
   const filtered = users.filter(u => u.email?.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <div className="adm-card">
-      <div className="adm-card-head">
-        <span className="adm-card-title">Users ({users.length})</span>
-        <div className="adm-search">
-          {Ico.search}
-          <input placeholder="Search by email..." value={search} onChange={e => setSearch(e.target.value)} />
+    <>
+      <div className="adm-card">
+        <div className="adm-card-head">
+          <span className="adm-card-title">Users ({users.length})</span>
+          <div className="adm-search">
+            {Ico.search}
+            <input placeholder="Search by email..." value={search} onChange={e => setSearch(e.target.value)} />
+          </div>
         </div>
-      </div>
 
-      {loading ? (
-        <div className="adm-loading">Loading users...</div>
-      ) : err ? (
-        <div className="adm-empty" style={{ color: "#ef4444" }}>
-          Could not load users.<br />
-          <span style={{ fontSize: "12px" }}>Make sure the <strong>profiles</strong> table exists — see setup instructions.</span>
-        </div>
-      ) : filtered.length === 0 ? (
-        <div className="adm-empty">No users found.</div>
-      ) : (
-        <table className="adm-table">
-          <thead>
-            <tr>
-              <th className="adm-th">Email</th>
-              <th className="adm-th">User ID</th>
-              <th className="adm-th">Joined</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map(u => (
-              <tr key={u.id} className="adm-tr">
-                <td className="adm-td" style={{ fontWeight: 500 }}>{u.email || "—"}</td>
-                <td className="adm-td" style={{ color: "#94a3b8", fontSize: "11px", fontFamily: "monospace" }}>{u.id}</td>
-                <td className="adm-td" style={{ color: "#94a3b8", fontSize: "12px" }}>{new Date(u.created_at).toLocaleDateString()}</td>
+        {loading ? (
+          <div className="adm-loading">Loading users...</div>
+        ) : err ? (
+          <div className="adm-empty" style={{ color: "#ef4444" }}>
+            Could not load users.<br />
+            <span style={{ fontSize: "12px" }}>Make sure the <strong>Users</strong> table has an <strong>is_admin</strong> column. Run: <code>alter table "Users" add column if not exists is_admin boolean default false;</code></span>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="adm-empty">No users found.</div>
+        ) : (
+          <table className="adm-table">
+            <thead>
+              <tr>
+                <th className="adm-th">Email</th>
+                <th className="adm-th">Role</th>
+                <th className="adm-th">User ID</th>
+                <th className="adm-th">Joined</th>
+                <th className="adm-th">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </div>
+            </thead>
+            <tbody>
+              {filtered.map(u => (
+                <tr key={u.id} className="adm-tr">
+                  <td className="adm-td" style={{ fontWeight: 500 }}>{u.email || "—"}</td>
+                  <td className="adm-td">
+                    <span style={{
+                      display: "inline-block", fontSize: 10, fontWeight: 500,
+                      padding: "3px 10px", borderRadius: 12, textTransform: "capitalize",
+                      ...(u.is_admin
+                        ? { background: "#fffbf0", color: "#c59c55", border: "1px solid rgba(197,156,85,0.3)" }
+                        : { background: "#f1f5f9", color: "#64748b", border: "1px solid #e2e8f0" })
+                    }}>
+                      {u.is_admin ? "Admin" : "Customer"}
+                    </span>
+                  </td>
+                  <td className="adm-td" style={{ color: "#94a3b8", fontSize: "11px", fontFamily: "monospace" }}>{u.id}</td>
+                  <td className="adm-td" style={{ color: "#94a3b8", fontSize: "12px" }}>{new Date(u.created_at).toLocaleDateString()}</td>
+                  <td className="adm-td">
+                    <button
+                      className={`adm-btn adm-btn-sm ${u.is_admin ? "adm-btn-red" : "adm-btn-gold"}`}
+                      onClick={() => toggleAdmin(u)}
+                    >
+                      {u.is_admin ? "Make Customer" : "Make Admin"}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+      {toast && <Toast msg={toast} onDone={() => setToast(null)} />}
+    </>
   );
 }
 
