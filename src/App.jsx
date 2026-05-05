@@ -1105,7 +1105,7 @@ export default function App() {
       <style>{globalStyles}</style>
       <Navbar
         page={page} setPage={setPage} theme={theme} toggleTheme={toggleTheme}
-        user={user} onAuthOpen={() => setAuthModal("signin")} onSignOut={() => supabase.auth.signOut()}
+        user={user} onAuthOpen={() => setAuthModal("signin")} onSignOut={async () => { await supabase.auth.signOut(); window.location.href = "/"; }}
       />
       {page === "home"     && <Home setPage={setPage} theme={theme}/>}
       {page === "collection" && (
