@@ -261,14 +261,14 @@ function LoginScreen({ onExit }) {
     setErr(""); setSuccess(""); setLoading(true);
     if (mode === "signup") {
       if (password !== confirm) { setErr("Passwords do not match."); setLoading(false); return; }
-      const { data: signUpData, error } = await supabase.auth.signUp({ email, password });
+      const { error } = await supabase.auth.signUp({ email, password });
       if (error) setErr(error.message);
       else {
-        if (signUpData.user) {
-          await supabase.from("Users").upsert(
-            [{ id: signUpData.user.id, email, is_admin: true, created_at: new Date().toISOString() }],
-            { onConflict: "id" }
-          );
+        const { data: existing } = await supabase.from("Users").select("id").eq("email", email).maybeSingle();
+        if (existing) {
+          await supabase.from("Users").update({ is_admin: true }).eq("email", email);
+        } else {
+          await supabase.from("Users").insert([{ email, is_admin: true, created_at: new Date().toISOString() }]);
         }
         setSuccess("Account created! You can now sign in.");
       }
