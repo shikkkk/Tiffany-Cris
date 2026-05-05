@@ -938,7 +938,7 @@ export default function AdminPage({ onExit }) {
     <>
       <style>{S}</style>
       <div className={"adm" + darkClass}>
-        <Sidebar tab={tab} setTab={setTab} user={user} onSignOut={() => supabase.auth.signOut()} onExit={onExit} />
+        <Sidebar tab={tab} setTab={setTab} user={user} onSignOut={async () => { await supabase.auth.signOut(); window.location.href = "/"; }} onExit={onExit} />
         <div className="adm-main">
           <div className="adm-topbar">
             <div className="adm-topbar-title">{titles[tab]}</div>
