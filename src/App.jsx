@@ -1045,7 +1045,7 @@ export default function App() {
       const u = session?.user ?? null;
       setUser(u);
       if (u && !alreadyAdmin) {
-        const { data } = await supabase.from("Users").select("is_admin").eq("email", u.email).maybeSingle();
+        const { data } = await supabase.from("Users").select("is_admin").eq("email", u.email).limit(1).maybeSingle();
         if (data?.is_admin) { window.location.href = "/?admin"; }
       }
     });
@@ -1053,7 +1053,7 @@ export default function App() {
       const u = session?.user ?? null;
       setUser(u);
       if (event === "SIGNED_IN" && u && !alreadyAdmin) {
-        const { data } = await supabase.from("Users").select("is_admin").eq("email", u.email).maybeSingle();
+        const { data } = await supabase.from("Users").select("is_admin").eq("email", u.email).limit(1).maybeSingle();
         if (data?.is_admin) { window.location.href = "/?admin"; }
       }
     });
