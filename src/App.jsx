@@ -1028,10 +1028,11 @@ export default function App() {
   const isAdmin = window.location.search.includes("admin");
 
   useEffect(() => {
+    const alreadyAdmin = window.location.search.includes("admin");
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       const u = session?.user ?? null;
       setUser(u);
-      if (u) {
+      if (u && !alreadyAdmin) {
         const { data } = await supabase.from("Users").select("is_admin").eq("email", u.email).maybeSingle();
         if (data?.is_admin) { window.location.href = "/?admin"; }
       }
@@ -1039,7 +1040,7 @@ export default function App() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       const u = session?.user ?? null;
       setUser(u);
-      if (event === "SIGNED_IN" && u) {
+      if (event === "SIGNED_IN" && u && !alreadyAdmin) {
         const { data } = await supabase.from("Users").select("is_admin").eq("email", u.email).maybeSingle();
         if (data?.is_admin) { window.location.href = "/?admin"; }
       }
