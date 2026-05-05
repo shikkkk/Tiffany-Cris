@@ -319,6 +319,7 @@ function Sidebar({ tab, setTab, user, onSignOut, onExit }) {
     { key: "overview",     label: "Overview",     icon: Ico.home },
     { key: "collections",  label: "Collections",  icon: Ico.grid },
     { key: "users",        label: "Users",        icon: Ico.users },
+    { key: "requests",     label: "Requests",     icon: Ico.eye },
   ];
   return (
     <aside className="adm-sb">
@@ -732,6 +733,106 @@ function UsersPanel() {
   );
 }
 
+/* ─── REQUESTS PANEL ─────────────────────────────────────────────────── */
+const STATUS_STYLE = {
+  pending:   { bg: "#fffbf0", color: "#c59c55", border: "rgba(197,156,85,0.3)" },
+  confirmed: { bg: "#f0fdf4", color: "#16a34a", border: "rgba(22,163,74,0.3)" },
+  completed: { bg: "#f8fafc", color: "#64748b", border: "#e2e8f0" },
+  declined:  { bg: "#fef2f2", color: "#ef4444", border: "#fecaca" },
+};
+
+function RequestsPanel({ onCountChange }) {
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
+
+  useEffect(() => { load(); }, []);
+
+  async function load() {
+    setLoading(true);
+    const { data } = await supabase.from("viewing_requests").select("*").order("created_at", { ascending: false });
+    setRequests(data || []);
+    onCountChange?.(data?.length || 0);
+    setLoading(false);
+  }
+
+  async function updateStatus(id, status) {
+    await supabase.from("viewing_requests").update({ status }).eq("id", id);
+    setRequests(prev => prev.map(r => r.id === id ? { ...r, status } : r));
+  }
+
+  const filtered = requests.filter(r => {
+    const q = search.toLowerCase();
+    const matchSearch = r.user_email?.toLowerCase().includes(q) || r.collection_name?.toLowerCase().includes(q);
+    const matchStatus = statusFilter === "All" || r.status === statusFilter;
+    return matchSearch && matchStatus;
+  });
+
+  return (
+    <div className="adm-card">
+      <div className="adm-card-head">
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+          <span className="adm-card-title">Viewing Requests ({requests.length})</span>
+          <div style={{ display: "flex", gap: "6px" }}>
+            {["All", "pending", "confirmed", "completed", "declined"].map(s => (
+              <button key={s} className={`adm-btn adm-btn-sm ${statusFilter === s ? "adm-btn-gold" : "adm-btn-white"}`}
+                onClick={() => setStatusFilter(s)} style={{ textTransform: "capitalize" }}>{s}</button>
+            ))}
+          </div>
+        </div>
+        <div className="adm-search">
+          {Ico.search}
+          <input placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)} />
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="adm-loading">Loading requests...</div>
+      ) : filtered.length === 0 ? (
+        <div className="adm-empty">No viewing requests found.</div>
+      ) : (
+        <table className="adm-table">
+          <thead>
+            <tr>
+              <th className="adm-th">User</th>
+              <th className="adm-th">Item</th>
+              <th className="adm-th">Message</th>
+              <th className="adm-th">Status</th>
+              <th className="adm-th">Date</th>
+              <th className="adm-th">Update</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map(r => {
+              const sc = STATUS_STYLE[r.status] || STATUS_STYLE.pending;
+              return (
+                <tr key={r.id} className="adm-tr">
+                  <td className="adm-td" style={{ fontWeight: 500 }}>{r.user_email || "—"}</td>
+                  <td className="adm-td"><span className="adm-tag">{r.collection_name || "—"}</span></td>
+                  <td className="adm-td" style={{ maxWidth: 180, fontSize: 12, color: "#64748b" }}>{r.message || <span style={{ color: "#e2e8f0" }}>—</span>}</td>
+                  <td className="adm-td">
+                    <span style={{ display: "inline-block", fontSize: 10, fontWeight: 500, padding: "3px 10px", borderRadius: 12, textTransform: "capitalize", background: sc.bg, color: sc.color, border: `1px solid ${sc.border}` }}>{r.status}</span>
+                  </td>
+                  <td className="adm-td" style={{ color: "#94a3b8", fontSize: 12 }}>{new Date(r.created_at).toLocaleDateString()}</td>
+                  <td className="adm-td">
+                    <select className="adm-select" value={r.status} onChange={e => updateStatus(r.id, e.target.value)} style={{ width: "auto", padding: "5px 8px", fontSize: 11 }}>
+                      <option value="pending">Pending</option>
+                      <option value="confirmed">Confirm</option>
+                      <option value="completed">Complete</option>
+                      <option value="declined">Decline</option>
+                    </select>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+}
+
 /* ─── ROOT ───────────────────────────────────────────────────────────── */
 export default function AdminPage({ onExit }) {
   const [user, setUser] = useState(null);
@@ -740,6 +841,7 @@ export default function AdminPage({ onExit }) {
   const [colCount, setColCount] = useState(0);
   const [userCount, setUserCount] = useState(0);
   const [recentCols, setRecentCols] = useState([]);
+  const [reqCount, setReqCount] = useState(0);
   const [adminTheme, setAdminTheme] = useState(() => localStorage.getItem("adm-theme") || "light");
 
   function toggleAdminTheme() {
@@ -769,7 +871,7 @@ export default function AdminPage({ onExit }) {
       .then(({ data }) => setUserCount(data?.length || 0));
   }, [user]);
 
-  const titles = { overview: "Overview", collections: "Collections", users: "Users" };
+  const titles = { overview: "Overview", collections: "Collections", users: "Users", requests: "Viewing Requests" };
 
   const darkClass = adminTheme === "dark" ? " dark" : "";
 
@@ -816,6 +918,7 @@ export default function AdminPage({ onExit }) {
             {tab === "overview"    && <OverviewPanel colCount={colCount} userCount={userCount} recent={recentCols} />}
             {tab === "collections" && <CollectionsPanel onCountChange={setColCount} />}
             {tab === "users"       && <UsersPanel />}
+            {tab === "requests"    && <RequestsPanel onCountChange={setReqCount} />}
           </div>
         </div>
       </div>

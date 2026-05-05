@@ -286,6 +286,31 @@ const globalStyles = `
   [data-theme="light"] .ct-f-bottom { color: #9a8a70; }
   [data-theme="light"] .ct-success-title { color: #1a1208; }
   [data-theme="light"] .ct-success-msg { color: #6a5a40; }
+
+  /* ── AUTH MODAL ────────────────────────────────────────── */
+  .auth-card { background: #0a0804; border: 1px solid rgba(197,156,85,0.2); border-radius: 8px; padding: 44px 40px; width: 100%; max-width: 400px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
+  .auth-brand { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 300; color: #f0e4cc; margin-bottom: 4px; }
+  .auth-hint { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: #5a4a30; margin-bottom: 28px; font-family: 'Montserrat', sans-serif; }
+  .auth-tabs { display: flex; border: 1px solid rgba(197,156,85,0.2); border-radius: 4px; overflow: hidden; margin-bottom: 24px; }
+  .auth-tab { flex: 1; padding: 8px; font-size: 11px; font-weight: 500; font-family: 'Montserrat', sans-serif; letter-spacing: 0.1em; text-transform: uppercase; border: none; cursor: pointer; background: transparent; color: #5a4a30; transition: all 0.15s; }
+  .auth-tab.on { background: rgba(197,156,85,0.1); color: #c59c55; }
+  .auth-label { display: block; font-family: 'Montserrat', sans-serif; font-size: 9px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: #5a4a30; margin-bottom: 6px; }
+  .auth-input { width: 100%; font-family: 'Montserrat', sans-serif; font-size: 13px; color: #e8dcc8; background: #050403; border: 1px solid rgba(197,156,85,0.15); padding: 11px 14px; outline: none; margin-bottom: 14px; transition: border-color 0.2s; display: block; }
+  .auth-input:focus { border-color: rgba(197,156,85,0.5); }
+  .auth-input::placeholder { color: #3a3020; }
+  .auth-err { font-family: 'Montserrat', sans-serif; font-size: 11px; color: #ef4444; margin-bottom: 10px; }
+  .auth-ok  { font-family: 'Montserrat', sans-serif; font-size: 11px; color: #22c55e; margin-bottom: 10px; }
+  .auth-submit { width: 100%; font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; background: #c59c55; color: #0a0704; border: none; padding: 15px; cursor: pointer; margin-top: 4px; transition: background 0.2s; }
+  .auth-submit:hover { background: #d4aa65; }
+  .auth-submit:disabled { background: #3a2a14; color: #1a1208; cursor: not-allowed; }
+  .auth-back { background: none; border: none; color: #4a3e28; font-family: 'Montserrat', sans-serif; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; cursor: pointer; transition: color 0.2s; }
+  .auth-back:hover { color: #c59c55; }
+
+  /* ── WISHLIST HEART BUTTON ─────────────────────────────── */
+  .pc-wish-btn { position: absolute; top: 10px; right: 10px; width: 34px; height: 34px; background: rgba(5,4,3,0.78); border: 1px solid rgba(197,156,85,0.2); border-radius: 50%; color: #5a4a30; font-size: 17px; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: all 0.2s; z-index: 10; padding: 0; line-height: 1; }
+  .product-card:hover .pc-wish-btn { opacity: 1; }
+  .pc-wish-btn.on { opacity: 1; color: #c59c55; border-color: rgba(197,156,85,0.5); }
+  .pc-wish-btn:hover { background: rgba(197,156,85,0.15); color: #c59c55; border-color: #c59c55; }
 `;
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -387,7 +412,125 @@ function BagSilhouette() {
   );
 }
 
-function Navbar({ page, setPage, theme, toggleTheme }) {
+/* ── AUTH MODAL ──────────────────────────────────────────── */
+function AuthModal({ mode, onClose, onSuccess }) {
+  const [tab, setTab] = useState(mode || "signin");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [err, setErr] = useState("");
+  const [ok, setOk] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  function switchTab(t) { setTab(t); setErr(""); setOk(""); }
+
+  async function submit(e) {
+    e.preventDefault();
+    setErr(""); setLoading(true);
+    if (tab === "signup") {
+      if (password !== confirm) { setErr("Passwords don't match."); setLoading(false); return; }
+      const { error } = await supabase.auth.signUp({ email, password });
+      if (error) setErr(error.message);
+      else { setOk("Account created! You can now sign in."); switchTab("signin"); setPassword(""); setConfirm(""); }
+    } else {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) setErr(error.message);
+      else onSuccess();
+    }
+    setLoading(false);
+  }
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.88)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }} onClick={onClose}>
+      <div className="auth-card" onClick={e => e.stopPropagation()}>
+        <div className="auth-brand">Tiffany &amp; Cris</div>
+        <div className="auth-hint">Member Access</div>
+        <div className="auth-tabs">
+          {["signin", "signup"].map(t => (
+            <button key={t} type="button" className={`auth-tab${tab === t ? " on" : ""}`} onClick={() => switchTab(t)}>
+              {t === "signin" ? "Sign In" : "Sign Up"}
+            </button>
+          ))}
+        </div>
+        <form onSubmit={submit}>
+          <label className="auth-label">Email</label>
+          <input className="auth-input" type="email" placeholder="you@email.com" value={email} onChange={e => setEmail(e.target.value)} required autoFocus />
+          <label className="auth-label">Password</label>
+          <input className="auth-input" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required />
+          {tab === "signup" && (
+            <>
+              <label className="auth-label">Confirm Password</label>
+              <input className="auth-input" type="password" placeholder="••••••••" value={confirm} onChange={e => setConfirm(e.target.value)} required />
+            </>
+          )}
+          {err && <div className="auth-err">{err}</div>}
+          {ok  && <div className="auth-ok">{ok}</div>}
+          <button className="auth-submit" disabled={loading}>
+            {loading ? "Please wait..." : tab === "signin" ? "Sign In" : "Create Account"}
+          </button>
+        </form>
+        <div style={{ textAlign: "center", marginTop: "18px" }}>
+          <button className="auth-back" onClick={onClose}>← Back to Site</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── VIEWING REQUEST MODAL ───────────────────────────────── */
+function ViewingRequestModal({ item, user, onClose }) {
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(false);
+
+  async function submit(e) {
+    e.preventDefault();
+    setLoading(true);
+    await supabase.from("viewing_requests").insert([{
+      user_id: user.id,
+      user_email: user.email,
+      collection_id: String(item.id),
+      collection_name: item.name,
+      message: message || null,
+      status: "pending",
+    }]);
+    setDone(true);
+    setLoading(false);
+    setTimeout(onClose, 2500);
+  }
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.88)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }} onClick={onClose}>
+      <div className="auth-card" style={{ maxWidth: "440px" }} onClick={e => e.stopPropagation()}>
+        {done ? (
+          <div style={{ textAlign: "center", padding: "20px 0" }}>
+            <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "30px", fontWeight: 300, color: "#c59c55", marginBottom: "14px" }}>Request Received</div>
+            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "12px", color: "#6a5a40", lineHeight: 1.9 }}>
+              We'll contact you at <strong style={{ color: "#c59c55" }}>{user.email}</strong> within 24 hours to arrange your private viewing of the <em>{item.name}</em>.
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="auth-brand" style={{ fontSize: "22px" }}>Private Viewing</div>
+            <div className="auth-hint">{item.name}</div>
+            <form onSubmit={submit}>
+              <label className="auth-label">Your Email</label>
+              <input className="auth-input" type="email" value={user.email} disabled style={{ opacity: 0.55, cursor: "default" }} />
+              <label className="auth-label">Message (Optional)</label>
+              <textarea className="auth-input" placeholder="Any preferences or questions for the atelier..." value={message} onChange={e => setMessage(e.target.value)} style={{ height: "90px", resize: "none", lineHeight: 1.7 }} />
+              <button className="auth-submit" disabled={loading}>{loading ? "Submitting..." : "Submit Request"}</button>
+            </form>
+            <div style={{ textAlign: "center", marginTop: "14px" }}>
+              <button className="auth-back" onClick={onClose}>Cancel</button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Navbar({ page, setPage, theme, toggleTheme, user, onAuthOpen, onSignOut }) {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 40);
@@ -406,9 +549,17 @@ function Navbar({ page, setPage, theme, toggleTheme }) {
         <div className="tc-brand-sub">Luxury Collections</div>
       </div>
       <div className="tc-nav-links">
+        {user ? (
+          <>
+            <button className={`tc-nav-link${page === "wishlist" ? " active" : ""}`} onClick={() => go("wishlist")}>Wishlist</button>
+            <button className="tc-nav-link" onClick={onSignOut}>Sign Out</button>
+          </>
+        ) : (
+          <button className="tc-nav-link" onClick={onAuthOpen}>Sign In</button>
+        )}
         <button className={`tc-nav-link${page === "contact" ? " active" : ""}`} onClick={() => go("contact")}>Contact</button>
         <button className="tc-nav-link" onClick={toggleTheme} title="Toggle theme" style={{ fontSize: "15px", letterSpacing: 0 }}>
-          {theme === 'dark' ? '☀' : '☾'}
+          {theme === "dark" ? "☀" : "☾"}
         </button>
       </div>
     </nav>
@@ -512,8 +663,105 @@ function Home({ setPage, theme }) {
   );
 }
 
+/* ── WISHLIST PAGE ───────────────────────────────────────── */
+function WishlistPage({ user, wishlistIds, setPage, onWishlistToggle, onViewingRequest, onAuthRequired }) {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [modal, setModal] = useState(null);
+
+  useEffect(() => {
+    if (!user) { setLoading(false); return; }
+    if (wishlistIds.size === 0) { setItems([]); setLoading(false); return; }
+    supabase.from("collections").select("*").in("id", [...wishlistIds])
+      .then(({ data, error }) => {
+        if (!error && data) {
+          setItems(data.map(item => ({
+            id: item.id, name: item.name, cat: item.category, price: item.price,
+            img: item.image_url, specs: item.specs || {}, tagline: item.tagline,
+          })));
+        }
+        setLoading(false);
+      });
+  }, [wishlistIds, user]);
+
+  if (!user) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: "20px", paddingTop: "80px" }}>
+        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "32px", color: "#c59c55" }}>Your Wishlist</div>
+        <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "13px", color: "#6a5a40" }}>Sign in to view your saved pieces.</p>
+        <button className="btn-primary" onClick={onAuthRequired}>Sign In</button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="col-page">
+      <div className="col-hero">
+        <div className="col-hero-eyebrow">Member Collection</div>
+        <h1 className="col-hero-title">My <em>Wishlist</em></h1>
+        <p className="col-hero-sub">Your curated selection of timeless pieces.</p>
+      </div>
+
+      {loading ? (
+        <div style={{ textAlign: "center", padding: "80px", fontFamily: "'Montserrat', sans-serif", fontSize: "12px", color: "#6a5a40" }}>Loading...</div>
+      ) : items.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "80px" }}>
+          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "28px", color: "#c59c55", marginBottom: "16px" }}>Your wishlist is empty</div>
+          <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "13px", color: "#6a5a40", marginBottom: "32px" }}>Save pieces you love by clicking the heart on any item.</p>
+          <button className="btn-secondary" onClick={() => setPage("collection")}>Browse Collection</button>
+        </div>
+      ) : (
+        <div className="product-grid-wrap">
+          <div className="product-count">{items.length} saved piece{items.length !== 1 ? "s" : ""}</div>
+          <div className="product-grid">
+            {items.map(bag => (
+              <div className="product-card" key={bag.id} onClick={() => setModal(bag)}>
+                <div className="pc-img">
+                  <div className="pc-img-inner" style={bag.img ? { backgroundImage: `url(${bag.img})` } : {}} />
+                  <button className="pc-wish-btn on" onClick={e => { e.stopPropagation(); onWishlistToggle(bag.id); }}>&#9829;</button>
+                </div>
+                <div className="pc-info">
+                  <div className="pc-cat">{bag.cat}</div>
+                  <div className="pc-name">{bag.name}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className={`modal-bg${modal ? " open" : ""}`} onClick={e => { if (e.target.classList.contains("modal-bg")) setModal(null); }}>
+        {modal && (
+          <div className="modal-box">
+            <button className="modal-close-btn" onClick={() => setModal(null)}>&#10005; Close</button>
+            <div className="modal-img-side" style={modal.img ? { backgroundImage: `url(${modal.img})` } : {}} />
+            <div className="modal-info-side">
+              <div>
+                <div className="modal-cat">{modal.cat}</div>
+                <div className="modal-name">{modal.name}</div>
+                <div className="modal-tagline">{modal.tagline}</div>
+                <div className="modal-specs">
+                  {Object.entries(modal.specs).filter(([, v]) => v).map(([k, v]) => (
+                    <div className="modal-spec-row" key={k}>
+                      <span className="ms-label">{k}</span><span className="ms-val">{v}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <button className="modal-btn-primary" onClick={() => { onWishlistToggle(modal.id); setModal(null); }}>&#9829; Remove from Wishlist</button>
+                <button className="modal-btn-ghost" onClick={() => { onViewingRequest(modal); setModal(null); }}>Request Private Viewing</button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ── COLLECTION ──────────────────────────────────────── */
-function Collection() {
+function Collection({ user, wishlistIds, onWishlistToggle, onViewingRequest, onAuthRequired }) {
   const [activeTab, setActiveTab] = useState("All");
   const [sort, setSort] = useState("");
   const [modal, setModal] = useState(null);
@@ -524,27 +772,16 @@ function Collection() {
       .then(({ data, error }) => {
         if (!error && data?.length > 0) {
           setLiveBags(data.map(item => ({
-            id: item.id,
-            name: item.name,
-            cat: item.category,
-            price: item.price,
-            badge: item.badge,
-            badgeType: item.badge_type,
-            desc: item.description,
-            tagline: item.tagline,
-            img: item.image_url,
-            specs: item.specs || {},
-            colors: [],
+            id: item.id, name: item.name, cat: item.category, price: item.price,
+            badge: item.badge, badgeType: item.badge_type, desc: item.description,
+            tagline: item.tagline, img: item.image_url, specs: item.specs || {}, colors: [],
           })));
-        } else {
-          setLiveBags(null);
-        }
+        } else { setLiveBags(null); }
       })
       .catch(() => setLiveBags(null));
   }, []);
 
   const source = liveBags ?? bags;
-
   const filtered = source
     .filter(b => activeTab === "All" || b.cat === activeTab)
     .sort((a, b) => {
@@ -553,6 +790,8 @@ function Collection() {
       if (sort === "name") return a.name.localeCompare(b.name);
       return 0;
     });
+
+  const inWishlist = (id) => wishlistIds?.has(String(id));
 
   return (
     <div className="col-page">
@@ -568,18 +807,14 @@ function Collection() {
       <div className="filter-bar">
         <div className="filter-tabs">
           {TABS.map(tab => (
-            <button
-              key={tab}
-              className={`filter-tab${activeTab === tab ? " active" : ""}`}
-              onClick={() => setActiveTab(tab)}
-            >{tab}</button>
+            <button key={tab} className={`filter-tab${activeTab === tab ? " active" : ""}`} onClick={() => setActiveTab(tab)}>{tab}</button>
           ))}
         </div>
         <select className="filter-sort" value={sort} onChange={e => setSort(e.target.value)}>
           <option value="">Sort By</option>
-          <option value="price-asc">Price: Low – High</option>
-          <option value="price-desc">Price: High – Low</option>
-          <option value="name">Name A – Z</option>
+          <option value="price-asc">Price: Low - High</option>
+          <option value="price-desc">Price: High - Low</option>
+          <option value="name">Name A - Z</option>
         </select>
       </div>
 
@@ -592,6 +827,13 @@ function Collection() {
                 <div className="pc-img-inner" style={bag.img ? { backgroundImage: `url(${bag.img})` } : {}}>
                   {!bag.img && bagSvgs[bag.id]}
                 </div>
+                <button
+                  className={`pc-wish-btn${inWishlist(bag.id) ? " on" : ""}`}
+                  onClick={e => { e.stopPropagation(); onWishlistToggle ? onWishlistToggle(bag.id) : onAuthRequired?.(); }}
+                  title={inWishlist(bag.id) ? "Remove from wishlist" : "Add to wishlist"}
+                >
+                  {inWishlist(bag.id) ? "&#9829;" : "&#9825;"}
+                </button>
               </div>
               <div className="pc-info">
                 <div className="pc-cat">{bag.cat}</div>
@@ -602,13 +844,10 @@ function Collection() {
         </div>
       </div>
 
-      <div
-        className={`modal-bg${modal ? " open" : ""}`}
-        onClick={e => { if (e.target.classList.contains("modal-bg")) setModal(null); }}
-      >
+      <div className={`modal-bg${modal ? " open" : ""}`} onClick={e => { if (e.target.classList.contains("modal-bg")) setModal(null); }}>
         {modal && (
           <div className="modal-box">
-            <button className="modal-close-btn" onClick={() => setModal(null)}>✕ Close</button>
+            <button className="modal-close-btn" onClick={() => setModal(null)}>&#10005; Close</button>
             <div className="modal-img-side" style={modal.img ? { backgroundImage: `url(${modal.img})` } : {}}>
               {!modal.img && bagSvgs[modal.id]}
             </div>
@@ -618,7 +857,7 @@ function Collection() {
                 <div className="modal-name">{modal.name}</div>
                 <div className="modal-tagline">{modal.tagline}</div>
                 <div className="modal-specs">
-                  {Object.entries(modal.specs).map(([k, v]) => (
+                  {Object.entries(modal.specs).filter(([, v]) => v).map(([k, v]) => (
                     <div className="modal-spec-row" key={k}>
                       <span className="ms-label">{k}</span>
                       <span className="ms-val">{v}</span>
@@ -627,8 +866,12 @@ function Collection() {
                 </div>
               </div>
               <div>
-                <button className="modal-btn-primary">Add to Wishlist</button>
-                <button className="modal-btn-ghost">Request Private Viewing</button>
+                <button className="modal-btn-primary" onClick={() => onWishlistToggle ? onWishlistToggle(modal.id) : onAuthRequired?.()}>
+                  {inWishlist(modal.id) ? "&#9829; Saved to Wishlist" : "&#9825; Add to Wishlist"}
+                </button>
+                <button className="modal-btn-ghost" onClick={() => { onViewingRequest ? onViewingRequest(modal) : onAuthRequired?.(); setModal(null); }}>
+                  Request Private Viewing
+                </button>
               </div>
             </div>
           </div>
@@ -778,7 +1021,25 @@ function Contact() {
 export default function App() {
   const [page, setPage] = useState("home");
   const [theme, setTheme] = useState(() => localStorage.getItem("tc-theme") || "dark");
+  const [user, setUser] = useState(null);
+  const [wishlistIds, setWishlistIds] = useState(new Set());
+  const [authModal, setAuthModal] = useState(null);
+  const [viewingItem, setViewingItem] = useState(null);
   const isAdmin = window.location.search.includes("admin");
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => setUser(session?.user ?? null));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!user) { setWishlistIds(new Set()); return; }
+    supabase.from("wishlists").select("collection_id").eq("user_id", user.id)
+      .then(({ data }) => setWishlistIds(new Set(data?.map(w => String(w.collection_id)) || [])));
+  }, [user]);
 
   useEffect(() => {
     document.body.style.background = theme === "light" ? "#faf8f4" : "#050403";
@@ -793,6 +1054,23 @@ export default function App() {
     });
   }
 
+  async function handleWishlistToggle(collectionId) {
+    if (!user) { setAuthModal("signin"); return; }
+    const id = String(collectionId);
+    if (wishlistIds.has(id)) {
+      await supabase.from("wishlists").delete().eq("user_id", user.id).eq("collection_id", id);
+      setWishlistIds(prev => { const n = new Set(prev); n.delete(id); return n; });
+    } else {
+      await supabase.from("wishlists").insert([{ user_id: user.id, collection_id: id }]);
+      setWishlistIds(prev => new Set([...prev, id]));
+    }
+  }
+
+  function handleViewingRequest(item) {
+    if (!user) { setAuthModal("signin"); return; }
+    setViewingItem(item);
+  }
+
   if (isAdmin) {
     return <AdminPage onExit={() => window.location.href = "/"} />;
   }
@@ -800,10 +1078,35 @@ export default function App() {
   return (
     <div data-theme={theme} style={{ minHeight: "100vh" }}>
       <style>{globalStyles}</style>
-      <Navbar page={page} setPage={setPage} theme={theme} toggleTheme={toggleTheme}/>
-      {page === "home"       && <Home setPage={setPage} theme={theme}/>}
-      {page === "collection" && <Collection/>}
-      {page === "contact"    && <Contact/>}
+      <Navbar
+        page={page} setPage={setPage} theme={theme} toggleTheme={toggleTheme}
+        user={user} onAuthOpen={() => setAuthModal("signin")} onSignOut={() => supabase.auth.signOut()}
+      />
+      {page === "home"     && <Home setPage={setPage} theme={theme}/>}
+      {page === "collection" && (
+        <Collection
+          user={user} wishlistIds={wishlistIds}
+          onWishlistToggle={handleWishlistToggle}
+          onViewingRequest={handleViewingRequest}
+          onAuthRequired={() => setAuthModal("signin")}
+        />
+      )}
+      {page === "wishlist" && (
+        <WishlistPage
+          user={user} wishlistIds={wishlistIds} setPage={setPage}
+          onWishlistToggle={handleWishlistToggle}
+          onViewingRequest={handleViewingRequest}
+          onAuthRequired={() => setAuthModal("signin")}
+        />
+      )}
+      {page === "contact"  && <Contact/>}
+
+      {authModal && (
+        <AuthModal mode={authModal} onClose={() => setAuthModal(null)} onSuccess={() => setAuthModal(null)} />
+      )}
+      {viewingItem && user && (
+        <ViewingRequestModal item={viewingItem} user={user} onClose={() => setViewingItem(null)} />
+      )}
     </div>
   );
 }
