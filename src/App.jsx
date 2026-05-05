@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { supabase } from "./supabase";
+import AdminPage from "./AdminPage";
 import lvTwist from "./assets/twist.avif";
 import lvLoop from "./assets/loop.avif";
 import lvSpeedy from "./assets/speedy.avif";
@@ -241,6 +243,49 @@ const globalStyles = `
   .ct-f-link { display: block; font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 300; color: #3a3020; margin-bottom: 10px; letter-spacing: 0.04em; cursor: pointer; text-decoration: none; transition: color 0.2s; }
   .ct-f-link:hover { color: #c59c55; }
   .ct-f-bottom { display: flex; justify-content: space-between; align-items: center; max-width: 1100px; margin: 0 auto; padding-top: 24px; border-top: 1px solid rgba(197,156,85,0.07); font-family: 'Montserrat', sans-serif; font-size: 9px; font-weight: 400; color: #2a2018; letter-spacing: 0.1em; }
+
+  /* ── LIGHT MODE ────────────────────────────────────── */
+  [data-theme="light"] .tc-navbar.scrolled { background: rgba(250,248,244,0.96) !important; border-bottom-color: rgba(197,156,85,0.15) !important; }
+  [data-theme="light"] .tc-nav-link { color: #6a5a40; }
+  [data-theme="light"] .tc-brand-name { color: #1a1208; }
+  [data-theme="light"] .tc-brand-sub { color: #9a8a70; }
+  [data-theme="light"] .hero-bg { background-color: #faf8f4 !important; background-image: radial-gradient(ellipse 70% 60% at 50% 45%, rgba(197,156,85,0.1) 0%, transparent 75%) !important; }
+  [data-theme="light"] .hero-title-main { color: #1a1208; }
+  [data-theme="light"] .hero-desc { color: #6a5a40; }
+  [data-theme="light"] .grain-overlay { opacity: 0.05; }
+  [data-theme="light"] .col-page { background: #faf8f4; }
+  [data-theme="light"] .col-hero { background: #faf8f4 !important; border-bottom-color: rgba(197,156,85,0.1); }
+  [data-theme="light"] .col-hero-title { color: #1a1208; }
+  [data-theme="light"] .col-hero-sub { color: #6a5a40; }
+  [data-theme="light"] .filter-bar { background: #f0ebe0 !important; }
+  [data-theme="light"] .filter-tab { color: #6a5a40; }
+  [data-theme="light"] .product-count { color: #9a8a70; }
+  [data-theme="light"] .pc-img { background: #f0ebe0; }
+  [data-theme="light"] .pc-name { color: #1a1208; }
+  [data-theme="light"] .modal-box { background: #faf8f4 !important; }
+  [data-theme="light"] .modal-img-side { background: #f0ebe0 !important; }
+  [data-theme="light"] .modal-name { color: #1a1208; }
+  [data-theme="light"] .modal-tagline { color: #8a7a60; }
+  [data-theme="light"] .ms-val { color: #4a3a28; }
+  [data-theme="light"] .contact-page { background: #faf8f4; }
+  [data-theme="light"] .ct-hero { background: #faf8f4 !important; border-bottom-color: rgba(197,156,85,0.1); }
+  [data-theme="light"] .ct-title { color: #1a1208; }
+  [data-theme="light"] .ct-sub { color: #6a5a40; }
+  [data-theme="light"] .ct-label { color: #6a5a40; }
+  [data-theme="light"] .ct-input, [data-theme="light"] .ct-textarea, [data-theme="light"] .ct-select { background: #fff !important; color: #1a1208 !important; border-color: rgba(197,156,85,0.2) !important; }
+  [data-theme="light"] .ct-input::placeholder, [data-theme="light"] .ct-textarea::placeholder { color: #c0b090; }
+  [data-theme="light"] .ct-info-card { background: #fff !important; border-color: rgba(197,156,85,0.15) !important; }
+  [data-theme="light"] .ct-info-title { color: #1a1208; }
+  [data-theme="light"] .ct-info-text { color: #6a5a40; }
+  [data-theme="light"] .ct-loc-city { color: #1a1208; }
+  [data-theme="light"] .ct-loc-addr { color: #8a7a60; }
+  [data-theme="light"] .ct-footer-strip { background: #f0ebe0 !important; }
+  [data-theme="light"] .ct-f-brand { color: #1a1208; }
+  [data-theme="light"] .ct-f-about { color: #6a5a40; }
+  [data-theme="light"] .ct-f-link { color: #6a5a40; }
+  [data-theme="light"] .ct-f-bottom { color: #9a8a70; }
+  [data-theme="light"] .ct-success-title { color: #1a1208; }
+  [data-theme="light"] .ct-success-msg { color: #6a5a40; }
 `;
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -277,7 +322,7 @@ const bags = [
   {
     id: 4, name: "OnTheGo PM", cat: "Handbag", price: 3600,
     badge: null, badgeType: null,
-    desc: "Inspired by Louis Vuitton’s famous Sac Plat from 1968, the OnTheGo PM tote is fashioned in Monogram Empreinte leather, embossed with a Medium Bicolor Monogram pattern. This smaller version of the original OnTheGo fits essentials such as a mini tablet. ",
+    desc: "Inspired by Louis Vuitton's famous Sac Plat from 1968, the OnTheGo PM tote is fashioned in Monogram Empreinte leather, embossed with a Medium Bicolor Monogram pattern. This smaller version of the original OnTheGo fits essentials such as a mini tablet. ",
     tagline: "Architecture you can carry.",
     img: lvOnthego,
     colors: ["#0a0a0a", "#1a1208"],
@@ -342,7 +387,7 @@ function BagSilhouette() {
   );
 }
 
-function Navbar({ page, setPage }) {
+function Navbar({ page, setPage, theme, toggleTheme }) {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 40);
@@ -362,15 +407,44 @@ function Navbar({ page, setPage }) {
       </div>
       <div className="tc-nav-links">
         <button className={`tc-nav-link${page === "contact" ? " active" : ""}`} onClick={() => go("contact")}>Contact</button>
+        <button className="tc-nav-link" onClick={toggleTheme} title="Toggle theme" style={{ fontSize: "15px", letterSpacing: 0 }}>
+          {theme === 'dark' ? '☀' : '☾'}
+        </button>
       </div>
     </nav>
   );
 }
 
 /* ── HOME ────────────────────────────────────────────── */
-function Home({ setPage }) {
+function Home({ setPage, theme }) {
+  const [previews, setPreviews] = useState(null);
+
+  useEffect(() => {
+    supabase.from("collections").select("id, name, image_url")
+      .order("created_at", { ascending: false }).limit(3)
+      .then(({ data, error }) => {
+        if (!error && data?.length > 0) setPreviews(data);
+        else setPreviews(null);
+      })
+      .catch(() => setPreviews(null));
+  }, []);
+
   const goCollection = () => { setPage("collection"); window.scrollTo({ top: 0 }); };
   const goContact    = () => { setPage("contact");    window.scrollTo({ top: 0 }); };
+
+  const defaultPreviews = [
+    { id: "d1", image_url: lvTwist, name: "Vanity Chain Collection" },
+    { id: "d2", image_url: lvLoop, name: "Loop Monogram" },
+    { id: "d3", image_url: lvSpeedy, name: "Speedy Soft 30" },
+  ];
+  const displayPreviews = previews ?? defaultPreviews;
+
+  const isLight      = theme === 'light';
+  const heritageBg   = isLight ? '#f5f0e8' : 'black';
+  const previewBg    = isLight ? '#faf8f4' : '#050403';
+  const headingColor = isLight ? '#1a1208' : '#f0e4cc';
+  const accentSpan   = isLight ? '#1a1208' : '#ffffff';
+  const bodyTextClr  = isLight ? '#6a5a40' : '#9a8a70';
 
   return (
     <div className="hero-bg relative w-full min-h-screen flex flex-col overflow-hidden" style={{ fontFamily: "'Montserrat', sans-serif" }}>
@@ -378,7 +452,7 @@ function Home({ setPage }) {
 
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 py-16" style={{ paddingTop: "120px" }}>
         <div className="hero-eyebrow fade-in delay-1 mb-6">
-      
+
         </div>
         <h1 className="fade-in delay-2 mb-2">
           <span className="hero-title-main block">Tiffany &amp; Cris</span>
@@ -398,38 +472,34 @@ function Home({ setPage }) {
         </div>
       </div>
 
-      <section className="w-full py-40 px-6 text-center bg-black">
+      <section className="w-full py-40 px-6 text-center border-t border-[rgba(197,156,85,0.08)]" style={{ background: heritageBg }}>
         <div className="max-w-3xl mx-auto">
           <div style={{ fontSize: "11px", letterSpacing: "0.4em", textTransform: "uppercase", color: "#c59c55", marginBottom: "20px", fontFamily: "'Montserrat', sans-serif" }}>Our Heritage</div>
-          <h2 className="font-cormorant" style={{ fontSize: "56px", color: "#f0e4cc", fontWeight: 400, lineHeight: 1.2, marginBottom: "24px" }}>
-            Where <span style={{ color: "#ffffff" }}>obsidian</span> meets <span style={{ color: "#c59c55" }}>gold.</span>
+          <h2 className="font-cormorant" style={{ fontSize: "56px", color: headingColor, fontWeight: 400, lineHeight: 1.2, marginBottom: "24px" }}>
+            Where <span style={{ color: accentSpan }}>obsidian</span> meets <span style={{ color: "#c59c55" }}>gold.</span>
           </h2>
-          <p style={{ color: "#9a8a70", fontSize: "15px", lineHeight: 1.8, maxWidth: "520px", margin: "0 auto", fontFamily: "'Montserrat', sans-serif" }}>
-            “Each Tiffany & Cris piece is carefully curated from the world’s most renowned ateliers — from the finest Italian leathers to Parisian hand-finished clasps — ensuring every item reflects timeless luxury and craftsmanship.
+          <p style={{ color: bodyTextClr, fontSize: "15px", lineHeight: 1.8, maxWidth: "520px", margin: "0 auto", fontFamily: "'Montserrat', sans-serif" }}>
+            Each Tiffany &amp; Cris piece is carefully curated from the world's most renowned ateliers — from the finest Italian leathers to Parisian hand-finished clasps — ensuring every item reflects timeless luxury and craftsmanship.
           </p>
         </div>
       </section>
 
-      <section className="w-full py-40 px-6 bg-[#050403] text-center border-t border-[rgba(197,156,85,0.08)]">
+      <section className="w-full py-40 px-6 text-center border-t border-[rgba(197,156,85,0.08)]" style={{ background: previewBg }}>
         <div className="max-w-6xl mx-auto">
           <div style={{ fontSize: "11px", letterSpacing: "0.4em", textTransform: "uppercase", color: "#c59c55", marginBottom: "18px", fontFamily: "'Montserrat', sans-serif" }}>Collections Preview</div>
-          <h2 className="font-cormorant" style={{ fontSize: "54px", color: "#f0e4cc", fontWeight: 400, marginBottom: "60px", lineHeight: 1.2 }}>
+          <h2 className="font-cormorant" style={{ fontSize: "54px", color: headingColor, fontWeight: 400, marginBottom: "60px", lineHeight: 1.2 }}>
             A glimpse into <span style={{ color: "#c59c55" }}>timeless pieces</span>
           </h2>
           <div className="grid md:grid-cols-3 gap-10">
-            {[
-              { img: lvTwist, label: "Vanity Chain Collection" },
-              { img: lvLoop, label: "Loop Monogram" },
-              { img: lvSpeedy, label: "Speedy Soft 30" },
-            ].map(({ img, label }) => (
-              <div key={label} className="group cursor-pointer" onClick={goCollection}>
+            {displayPreviews.map((item) => (
+              <div key={item.id} className="group cursor-pointer" onClick={goCollection}>
                 <div className="h-[380px] border border-[rgba(197,156,85,0.15)] relative overflow-hidden"
-                  style={{ backgroundImage: `url(${img})`, backgroundSize: "cover", backgroundPosition: "center" }}>
+                  style={{ backgroundImage: `url(${item.image_url})`, backgroundSize: "cover", backgroundPosition: "center" }}>
                   <div className="absolute inset-0 bg-black/40 flex items-end p-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "9px", fontWeight: 600, letterSpacing: "0.28em", textTransform: "uppercase", color: "#c59c55", border: "1px solid rgba(197,156,85,0.6)", padding: "10px 18px", background: "rgba(5,4,3,0.85)", width: "100%", textAlign: "center", display: "block" }}>View Collection →</span>
                   </div>
                 </div>
-                <p className="mt-4 text-sm text-[#9a8a70] font-montserrat tracking-widest uppercase">{label}</p>
+                <p className="mt-4 text-sm text-[#9a8a70] font-montserrat tracking-widest uppercase">{item.name}</p>
               </div>
             ))}
           </div>
@@ -447,8 +517,35 @@ function Collection() {
   const [activeTab, setActiveTab] = useState("All");
   const [sort, setSort] = useState("");
   const [modal, setModal] = useState(null);
+  const [liveBags, setLiveBags] = useState(null);
 
-  const filtered = bags
+  useEffect(() => {
+    supabase.from("collections").select("*").order("created_at", { ascending: false })
+      .then(({ data, error }) => {
+        if (!error && data?.length > 0) {
+          setLiveBags(data.map(item => ({
+            id: item.id,
+            name: item.name,
+            cat: item.category,
+            price: item.price,
+            badge: item.badge,
+            badgeType: item.badge_type,
+            desc: item.description,
+            tagline: item.tagline,
+            img: item.image_url,
+            specs: item.specs || {},
+            colors: [],
+          })));
+        } else {
+          setLiveBags(null);
+        }
+      })
+      .catch(() => setLiveBags(null));
+  }, []);
+
+  const source = liveBags ?? bags;
+
+  const filtered = source
     .filter(b => activeTab === "All" || b.cat === activeTab)
     .sort((a, b) => {
       if (sort === "price-asc") return a.price - b.price;
@@ -680,14 +777,33 @@ function Contact() {
    ═══════════════════════════════════════════════════════════════════ */
 export default function App() {
   const [page, setPage] = useState("home");
+  const [theme, setTheme] = useState(() => localStorage.getItem("tc-theme") || "dark");
+  const isAdmin = window.location.search.includes("admin");
+
+  useEffect(() => {
+    document.body.style.background = theme === "light" ? "#faf8f4" : "#050403";
+    document.body.style.color      = theme === "light" ? "#1a1208"  : "#e8dcc8";
+  }, [theme]);
+
+  function toggleTheme() {
+    setTheme(t => {
+      const next = t === "dark" ? "light" : "dark";
+      localStorage.setItem("tc-theme", next);
+      return next;
+    });
+  }
+
+  if (isAdmin) {
+    return <AdminPage onExit={() => window.location.href = "/"} />;
+  }
 
   return (
-    <>
+    <div data-theme={theme} style={{ minHeight: "100vh" }}>
       <style>{globalStyles}</style>
-      <Navbar page={page} setPage={setPage}/>
-      {page === "home"       && <Home setPage={setPage}/>}
+      <Navbar page={page} setPage={setPage} theme={theme} toggleTheme={toggleTheme}/>
+      {page === "home"       && <Home setPage={setPage} theme={theme}/>}
       {page === "collection" && <Collection/>}
       {page === "contact"    && <Contact/>}
-    </>
+    </div>
   );
 }
