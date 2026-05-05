@@ -429,13 +429,29 @@ function AuthModal({ mode, onClose, onSuccess }) {
     setErr(""); setLoading(true);
     if (tab === "signup") {
       if (password !== confirm) { setErr("Passwords don't match."); setLoading(false); return; }
-      const { error } = await supabase.auth.signUp({ email, password });
+      const { data: authData, error } = await supabase.auth.signUp({ email, password });
       if (error) setErr(error.message);
-      else { setOk("Account created! You can now sign in."); switchTab("signin"); setPassword(""); setConfirm(""); }
+      else {
+        if (authData.user) {
+          await supabase.from("Users").upsert(
+            [{ id: authData.user.id, email, is_admin: false, created_at: new Date().toISOString() }],
+            { onConflict: "id" }
+          );
+        }
+        setOk("Account created! You can now sign in."); switchTab("signin"); setPassword(""); setConfirm("");
+      }
     } else {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data: signInData, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) setErr(error.message);
-      else onSuccess();
+      else {
+        if (signInData.user) {
+          await supabase.from("Users").upsert(
+            [{ id: signInData.user.id, email, created_at: new Date().toISOString() }],
+            { onConflict: "id", ignoreDuplicates: true }
+          );
+        }
+        onSuccess();
+      }
     }
     setLoading(false);
   }
