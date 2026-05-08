@@ -50,8 +50,8 @@ const globalStyles = `
     letter-spacing: 0.48em; text-transform: uppercase; color: #5a4a28;
     margin-top: 2px;
   }
-  .tc-logo { height: 52px; width: auto; object-fit: contain; mix-blend-mode: multiply; display: block; }
-  [data-theme="light"] .tc-logo { mix-blend-mode: multiply; }
+  .tc-logo { height: 75px; width: auto; object-fit: contain; mix-blend-mode: multiply; display: block; }
+  [data-theme="light"] .tc-logo { mix-blend-mode: multiply; filter: brightness(0.38) sepia(0.3); }
   body:not([data-theme="light"]) .tc-logo { mix-blend-mode: screen; }
 
   /* ── HOME ──────────────────────────────────────────── */
@@ -308,6 +308,10 @@ const globalStyles = `
   [data-theme="light"] .hero-bg { background-color: #faf8f4 !important; background-image: radial-gradient(ellipse 70% 60% at 50% 45%, rgba(197,156,85,0.1) 0%, transparent 75%) !important; }
   [data-theme="light"] .hero-title-main { color: #1a1208; }
   [data-theme="light"] .hero-desc { color: #6a5a40; }
+  [data-theme="light"] .btn-secondary { background: rgba(0,0,0,0.06); color: #3a2a10; border-color: rgba(90,74,40,0.35); }
+  [data-theme="light"] .btn-secondary:hover { background: rgba(0,0,0,0.14); }
+  [data-theme="light"] .pc-wish-btn { background: rgba(0,0,0,0.06); border-color: rgba(90,74,40,0.25); color: #5a4a30; }
+  [data-theme="light"] .pc-wish-btn:hover { background: rgba(0,0,0,0.14); color: #c59c55; border-color: #c59c55; }
   [data-theme="light"] .grain-overlay { opacity: 0.05; }
   [data-theme="light"] .col-page { background: #faf8f4; }
   [data-theme="light"] .col-hero { background: #faf8f4 !important; border-bottom-color: rgba(197,156,85,0.1); }
@@ -545,58 +549,6 @@ function AuthModal({ mode, onClose, onSuccess }) {
   );
 }
 
-/* ── VIEWING REQUEST MODAL ───────────────────────────────── */
-function ViewingRequestModal({ item, user, onClose }) {
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [done, setDone] = useState(false);
-
-  async function submit(e) {
-    e.preventDefault();
-    setLoading(true);
-    await supabase.from("viewing_requests").insert([{
-      user_id: user.id,
-      user_email: user.email,
-      collection_id: String(item.id),
-      collection_name: item.name,
-      message: message || null,
-      status: "pending",
-    }]);
-    setDone(true);
-    setLoading(false);
-    setTimeout(onClose, 2500);
-  }
-
-  return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.88)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }} onClick={onClose}>
-      <div className="auth-card" style={{ maxWidth: "440px" }} onClick={e => e.stopPropagation()}>
-        {done ? (
-          <div style={{ textAlign: "center", padding: "20px 0" }}>
-            <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "30px", fontWeight: 300, color: "#c59c55", marginBottom: "14px" }}>Request Received</div>
-            <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "12px", color: "#6a5a40", lineHeight: 1.9 }}>
-              We'll contact you at <strong style={{ color: "#c59c55" }}>{user.email}</strong> within 24 hours to arrange your private viewing of the <em>{item.name}</em>.
-            </p>
-          </div>
-        ) : (
-          <>
-            <div className="auth-brand" style={{ fontSize: "22px" }}>Private Viewing</div>
-            <div className="auth-hint">{item.name}</div>
-            <form onSubmit={submit}>
-              <label className="auth-label">Your Email</label>
-              <input className="auth-input" type="email" value={user.email} disabled style={{ opacity: 0.55, cursor: "default" }} />
-              <label className="auth-label">Message (Optional)</label>
-              <textarea className="auth-input" placeholder="Any preferences or questions for the atelier..." value={message} onChange={e => setMessage(e.target.value)} style={{ height: "90px", resize: "none", lineHeight: 1.7 }} />
-              <button className="auth-submit" disabled={loading}>{loading ? "Submitting..." : "Submit Request"}</button>
-            </form>
-            <div style={{ textAlign: "center", marginTop: "14px" }}>
-              <button className="auth-back" onClick={onClose}>Cancel</button>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
 
 function Navbar({ page, setPage, theme, toggleTheme, user, onAuthOpen, onSignOut }) {
   const [scrolled, setScrolled] = useState(false);
@@ -1118,7 +1070,6 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [wishlistIds, setWishlistIds] = useState(new Set());
   const [authModal, setAuthModal] = useState(null);
-  const [viewingItem, setViewingItem] = useState(null);
   const isAdmin = window.location.search.includes("admin");
 
   useEffect(() => {
@@ -1173,9 +1124,9 @@ export default function App() {
     }
   }
 
-  function handleViewingRequest(item) {
+  function handleViewingRequest() {
     if (!user) { setAuthModal("signin"); return; }
-    setViewingItem(item);
+    window.open("https://www.facebook.com/tiffanyandcris", "_blank");
   }
 
   if (isAdmin) {
@@ -1210,9 +1161,6 @@ export default function App() {
 
       {authModal && (
         <AuthModal mode={authModal} onClose={() => setAuthModal(null)} onSuccess={() => setAuthModal(null)} />
-      )}
-      {viewingItem && user && (
-        <ViewingRequestModal item={viewingItem} user={user} onClose={() => setViewingItem(null)} />
       )}
     </div>
   );
