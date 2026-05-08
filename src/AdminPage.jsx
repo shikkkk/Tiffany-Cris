@@ -202,6 +202,39 @@ const S = `
   .adm.dark .adm-toast { background: #334155; }
   .adm.dark .adm-empty { color: #475569; }
   .adm.dark .adm-loading { color: #64748b; }
+
+  /* ── RESPONSIVE ──────────────────────────────────── */
+  .adm-ham { display: none; background: none; border: none; cursor: pointer; padding: 6px; color: #64748b; line-height: 1; margin-right: 4px; }
+  .adm.dark .adm-ham { color: #94a3b8; }
+  .adm-sb-mask { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 149; }
+
+  @media (max-width: 1024px) {
+    .adm-sb { transform: translateX(-100%); transition: transform 0.25s ease; z-index: 200; }
+    .adm-sb.open { transform: translateX(0); box-shadow: 4px 0 32px rgba(0,0,0,0.2); }
+    .adm-sb-mask.open { display: block; }
+    .adm-main { margin-left: 0; }
+    .adm-ham { display: flex; align-items: center; }
+    .adm-stats { grid-template-columns: repeat(2, 1fr); }
+    .adm-content { padding: 20px; }
+  }
+
+  @media (max-width: 600px) {
+    .adm-stats { grid-template-columns: 1fr; }
+    .adm-content { padding: 12px; }
+    .adm-topbar { padding: 0 12px; }
+    .adm-topbar-title { font-size: 13px; }
+    .adm-user-pill { max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
+    .adm-card-head { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .adm-search input { width: 100%; }
+    .adm-row2 { grid-template-columns: 1fr; }
+    .adm-panel { width: 100%; max-width: 100%; }
+    .adm-card { overflow-x: auto; }
+    .adm-table { min-width: 480px; }
+    .adm-login-card { padding: 32px 20px; }
+    .adm-panel-body { padding: 16px; }
+    .adm-panel-head { padding: 14px 16px; }
+    .adm-panel-footer { padding: 12px 16px; }
+  }
 `;
 
 /* ─── ICONS ──────────────────────────────────────────────────────────── */
@@ -217,6 +250,7 @@ const Ico = {
   edit:    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
   trash:   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>,
   upload:  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>,
+  menu:    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>,
 };
 
 /* ─── TOAST ──────────────────────────────────────────────────────────── */
@@ -322,7 +356,7 @@ function LoginScreen({ onExit }) {
 }
 
 /* ─── SIDEBAR ────────────────────────────────────────────────────────── */
-function Sidebar({ tab, setTab, user, onSignOut, onExit }) {
+function Sidebar({ tab, setTab, user, onSignOut, onExit, open, onClose }) {
   const navItems = [
     { key: "overview",     label: "Overview",     icon: Ico.home },
     { key: "collections",  label: "Collections",  icon: Ico.grid },
@@ -330,7 +364,7 @@ function Sidebar({ tab, setTab, user, onSignOut, onExit }) {
     { key: "requests",     label: "Requests",     icon: Ico.eye },
   ];
   return (
-    <aside className="adm-sb">
+    <aside className={`adm-sb${open ? " open" : ""}`}>
       <div className="adm-sb-brand">
         <div className="adm-sb-name">Tiffany &amp; Cris</div>
         <div className="adm-sb-sub">Admin Dashboard</div>
@@ -338,7 +372,7 @@ function Sidebar({ tab, setTab, user, onSignOut, onExit }) {
       <nav className="adm-sb-nav">
         <div className="adm-sb-sec">Menu</div>
         {navItems.map(({ key, label, icon }) => (
-          <button key={key} className={`adm-sb-item${tab === key ? " on" : ""}`} onClick={() => setTab(key)}>
+          <button key={key} className={`adm-sb-item${tab === key ? " on" : ""}`} onClick={() => { setTab(key); onClose?.(); }}>
             {icon} {label}
           </button>
         ))}
@@ -448,9 +482,8 @@ function CollectionForm({ editItem, onSave, onClose }) {
             </div>
             <div className="adm-field">
               <label className="adm-label">Category</label>
-              <select className="adm-select" value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}>
-                {CATS.map(c => <option key={c}>{c}</option>)}
-              </select>
+              <input className="adm-input" placeholder="e.g. Handbag, Tote Bag..." value={form.category}
+                onChange={e => setForm(f => ({ ...f, category: e.target.value }))} required />
             </div>
           </div>
           <div className="adm-row2">
@@ -883,6 +916,7 @@ export default function AdminPage({ onExit }) {
   const [recentCols, setRecentCols] = useState([]);
   const [reqCount, setReqCount] = useState(0);
   const [adminTheme, setAdminTheme] = useState(() => localStorage.getItem("adm-theme") || "light");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   function toggleAdminTheme() {
     setAdminTheme(t => {
@@ -938,10 +972,15 @@ export default function AdminPage({ onExit }) {
     <>
       <style>{S}</style>
       <div className={"adm" + darkClass}>
-        <Sidebar tab={tab} setTab={setTab} user={user} onSignOut={async () => { await supabase.auth.signOut(); window.location.href = "/"; }} onExit={onExit} />
+        <div className={`adm-sb-mask${sidebarOpen ? " open" : ""}`} onClick={() => setSidebarOpen(false)} />
+        <Sidebar tab={tab} setTab={setTab} user={user} open={sidebarOpen} onClose={() => setSidebarOpen(false)}
+          onSignOut={async () => { await supabase.auth.signOut(); window.location.href = "/"; }} onExit={onExit} />
         <div className="adm-main">
           <div className="adm-topbar">
-            <div className="adm-topbar-title">{titles[tab]}</div>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <button className="adm-ham" onClick={() => setSidebarOpen(s => !s)}>{Ico.menu}</button>
+              <div className="adm-topbar-title">{titles[tab]}</div>
+            </div>
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               <button
                 className="adm-btn adm-btn-white adm-btn-sm"

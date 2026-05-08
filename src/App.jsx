@@ -147,9 +147,61 @@ const globalStyles = `
   .pc-cat { font-family: 'Montserrat', sans-serif; font-size: 7.5px; font-weight: 500; letter-spacing: 0.32em; text-transform: uppercase; color: #6a5a38; margin-bottom: 5px; }
   .pc-name { font-family: 'Cormorant Garamond', serif; font-size: 15px; font-weight: 400; color: #d4c4a0; line-height: 1.3; transition: color 0.25s; }
 
+  /* ── HAMBURGER / MOBILE MENU ─────────────────────── */
+  .tc-ham { display: none; background: none; border: none; cursor: pointer; color: #7a6a50; padding: 4px; line-height: 1; z-index: 101; }
+  .tc-mobile-menu {
+    position: fixed; inset: 0; background: rgba(5,4,3,0.97); z-index: 99;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px;
+    animation: fadeUp 0.2s ease;
+  }
+  .tc-mobile-link {
+    font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 500;
+    letter-spacing: 0.32em; text-transform: uppercase; color: #7a6a50;
+    background: none; border: none; cursor: pointer; padding: 8px 0; transition: color 0.2s;
+  }
+  .tc-mobile-link:hover { color: #c59c55; }
+  [data-theme="light"] .tc-mobile-menu { background: rgba(250,248,244,0.98); }
+  [data-theme="light"] .tc-ham { color: #4a3e28; }
+
   /* Responsive */
   @media (max-width: 1100px) { .product-grid { grid-template-columns: repeat(3, 1fr); } }
   @media (max-width: 720px)  { .product-grid { grid-template-columns: repeat(2, 1fr); } .product-grid-wrap { padding: 40px 24px 80px; } }
+
+  @media (max-width: 768px) {
+    .tc-navbar { padding: 16px 20px; }
+    .tc-nav-links { display: none; }
+    .tc-ham { display: flex; align-items: center; }
+    .tc-brand { position: static; transform: none; }
+    .col-hero { padding: 110px 24px 56px; }
+    .col-hero-title { font-size: 36px; }
+    .filter-bar { padding: 0 16px; overflow-x: auto; flex-wrap: nowrap; justify-content: flex-start; gap: 8px; }
+    .filter-tabs { flex-wrap: nowrap; }
+    .filter-tab { padding: 14px 12px; white-space: nowrap; }
+    .filter-sort { display: none; }
+    .modal-box { grid-template-columns: 1fr; max-width: 420px; }
+    .modal-img-side { min-height: 220px; }
+    .modal-info-side { padding: 24px 20px; }
+    .modal-name { font-size: 28px; }
+    .ct-body { grid-template-columns: 1fr; padding: 48px 20px 64px; gap: 40px; }
+    .ct-row { grid-template-columns: 1fr; }
+    .ct-footer-grid { grid-template-columns: 1fr 1fr; gap: 28px; }
+    .ct-footer-strip { padding: 44px 20px 24px; }
+    .ct-f-bottom { flex-direction: column; gap: 8px; text-align: center; }
+    .ct-hero { padding: 120px 20px 56px; }
+    .hero-bg { padding: 0; }
+    .btn-primary, .btn-secondary { padding: 14px 24px; }
+  }
+
+  @media (max-width: 480px) {
+    .product-grid { grid-template-columns: repeat(2, 1fr); gap: 16px 12px; }
+    .product-grid-wrap { padding: 32px 16px 64px; }
+    .ct-footer-grid { grid-template-columns: 1fr; }
+    .modal-box { max-width: 100%; margin: 0; }
+    .modal-bg { padding: 0; align-items: flex-end; }
+    .modal-box { border-radius: 12px 12px 0 0; max-height: 92vh; }
+    .modal-img-side { min-height: 180px; }
+    .auth-card { padding: 32px 20px; }
+  }
 
   /* MODAL */
   .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 200; align-items: center; justify-content: center; padding: 24px; }
@@ -544,37 +596,64 @@ function ViewingRequestModal({ item, user, onClose }) {
 
 function Navbar({ page, setPage, theme, toggleTheme, user, onAuthOpen, onSignOut }) {
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 40);
     window.addEventListener("scroll", fn);
     return () => window.removeEventListener("scroll", fn);
   }, []);
-  const go = (p) => { setPage(p); window.scrollTo({ top: 0, behavior: "smooth" }); };
+  const go = (p) => { setPage(p); window.scrollTo({ top: 0, behavior: "smooth" }); setMenuOpen(false); };
   return (
-    <nav className={`tc-navbar${scrolled ? " scrolled" : ""}`}>
-      <div className="tc-nav-links">
-        <button className={`tc-nav-link${page === "home" ? " active" : ""}`} onClick={() => go("home")}>Home</button>
-        <button className={`tc-nav-link${page === "collection" ? " active" : ""}`} onClick={() => go("collection")}>Collection</button>
-      </div>
-      <div className="tc-brand" onClick={() => go("home")}>
-        <div className="tc-brand-name">Tiffany &amp; Cris</div>
-        <div className="tc-brand-sub">Luxury Collections</div>
-      </div>
-      <div className="tc-nav-links">
-        {user ? (
-          <>
-            <button className={`tc-nav-link${page === "wishlist" ? " active" : ""}`} onClick={() => go("wishlist")}>Wishlist</button>
-            <button className="tc-nav-link" onClick={onSignOut}>Sign Out</button>
-          </>
-        ) : (
-          <button className="tc-nav-link" onClick={onAuthOpen}>Sign In</button>
-        )}
-        <button className={`tc-nav-link${page === "contact" ? " active" : ""}`} onClick={() => go("contact")}>Contact</button>
-        <button className="tc-nav-link" onClick={toggleTheme} title="Toggle theme" style={{ fontSize: "15px", letterSpacing: 0 }}>
-          {theme === "dark" ? "☀" : "☾"}
+    <>
+      <nav className={`tc-navbar${scrolled ? " scrolled" : ""}`}>
+        <div className="tc-nav-links">
+          <button className={`tc-nav-link${page === "home" ? " active" : ""}`} onClick={() => go("home")}>Home</button>
+          <button className={`tc-nav-link${page === "collection" ? " active" : ""}`} onClick={() => go("collection")}>Collection</button>
+        </div>
+        <div className="tc-brand" onClick={() => go("home")}>
+          <div className="tc-brand-name">Tiffany &amp; Cris</div>
+          <div className="tc-brand-sub">Luxury Collections</div>
+        </div>
+        <div className="tc-nav-links">
+          {user ? (
+            <>
+              <button className={`tc-nav-link${page === "wishlist" ? " active" : ""}`} onClick={() => go("wishlist")}>Wishlist</button>
+              <button className="tc-nav-link" onClick={onSignOut}>Sign Out</button>
+            </>
+          ) : (
+            <button className="tc-nav-link" onClick={onAuthOpen}>Sign In</button>
+          )}
+          <button className={`tc-nav-link${page === "contact" ? " active" : ""}`} onClick={() => go("contact")}>Contact</button>
+          <button className="tc-nav-link" onClick={toggleTheme} title="Toggle theme" style={{ fontSize: "15px", letterSpacing: 0 }}>
+            {theme === "dark" ? "☀" : "☾"}
+          </button>
+        </div>
+        <button className="tc-ham" onClick={() => setMenuOpen(m => !m)} aria-label="Menu">
+          {menuOpen
+            ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            : <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          }
         </button>
-      </div>
-    </nav>
+      </nav>
+      {menuOpen && (
+        <div className="tc-mobile-menu" onClick={() => setMenuOpen(false)}>
+          <button className="tc-mobile-link" onClick={() => go("home")}>Home</button>
+          <button className="tc-mobile-link" onClick={() => go("collection")}>Collection</button>
+          {user ? (
+            <>
+              <button className="tc-mobile-link" onClick={() => go("wishlist")}>Wishlist</button>
+              <button className="tc-mobile-link" onClick={() => { onSignOut(); setMenuOpen(false); }}>Sign Out</button>
+            </>
+          ) : (
+            <button className="tc-mobile-link" onClick={() => { onAuthOpen(); setMenuOpen(false); }}>Sign In</button>
+          )}
+          <button className="tc-mobile-link" onClick={() => go("contact")}>Contact</button>
+          <button className="tc-mobile-link" onClick={() => { toggleTheme(); setMenuOpen(false); }} style={{ fontSize: "20px" }}>
+            {theme === "dark" ? "☀" : "☾"}
+          </button>
+        </div>
+      )}
+    </>
   );
 }
 
