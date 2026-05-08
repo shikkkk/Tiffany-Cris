@@ -5,6 +5,7 @@ import lvTwist from "./assets/twist.avif";
 import lvLoop from "./assets/loop.avif";
 import lvSpeedy from "./assets/speedy.avif";
 import lvOnthego from "./assets/onthego.avif";
+import siteLogo from "./assets/tiff logo.png";
 
 /* ═══════════════════════════════════════════════════════════════════
    GLOBAL STYLES — All styles for nav, home, collection, contact
@@ -49,6 +50,9 @@ const globalStyles = `
     letter-spacing: 0.48em; text-transform: uppercase; color: #5a4a28;
     margin-top: 2px;
   }
+  .tc-logo { height: 52px; width: auto; object-fit: contain; mix-blend-mode: multiply; display: block; }
+  [data-theme="light"] .tc-logo { mix-blend-mode: multiply; }
+  body:not([data-theme="light"]) .tc-logo { mix-blend-mode: screen; }
 
   /* ── HOME ──────────────────────────────────────────── */
   .hero-bg {
@@ -611,8 +615,7 @@ function Navbar({ page, setPage, theme, toggleTheme, user, onAuthOpen, onSignOut
           <button className={`tc-nav-link${page === "collection" ? " active" : ""}`} onClick={() => go("collection")}>Collection</button>
         </div>
         <div className="tc-brand" onClick={() => go("home")}>
-          <div className="tc-brand-name">Tiffany &amp; Cris</div>
-          <div className="tc-brand-sub">Luxury Collections</div>
+          <img src={siteLogo} alt="Tiffany & Cris" className="tc-logo" />
         </div>
         <div className="tc-nav-links">
           {user ? (
