@@ -11,7 +11,6 @@ import siteLogo from "./assets/tiff logo.png";
    GLOBAL STYLES — All styles for nav, home, collection, contact
    ═══════════════════════════════════════════════════════════════════ */
 const globalStyles = `
-  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,600&family=Montserrat:wght@300;400;500;600&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
   body { background: #050403; color: #e8dcc8; }
@@ -146,6 +145,7 @@ const globalStyles = `
 
   .pc-img { aspect-ratio: 4/5; position: relative; overflow: hidden; background: #0d0a05; display: flex; align-items: center; justify-content: center; }
   .pc-img-inner { width: 100%; height: 100%; transition: transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94); display: flex; align-items: center; justify-content: center; background-size: cover; background-position: center; }
+  img.pc-img-inner { object-fit: cover; object-position: center; display: block; }
 
   .pc-info { padding: 14px 2px 0; }
   .pc-cat { font-family: 'Montserrat', sans-serif; font-size: 7.5px; font-weight: 500; letter-spacing: 0.32em; text-transform: uppercase; color: #6a5a38; margin-bottom: 5px; }
@@ -213,7 +213,7 @@ const globalStyles = `
   .modal-box { background: #0a0804; border: 1px solid rgba(197,156,85,0.15); max-width: 760px; width: 100%; display: grid; grid-template-columns: 1fr 1fr; max-height: 90vh; overflow-y: auto; position: relative; }
   .modal-close-btn { position: absolute; top: 14px; right: 16px; background: none; border: none; font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: #4a3e28; cursor: pointer; transition: color 0.2s; z-index: 5; }
   .modal-close-btn:hover { color: #c59c55; }
-  .modal-img-side { background: #0d0a05; display: flex; align-items: center; justify-content: center; min-height: 380px; background-size: cover; background-position: center; }
+  .modal-img-side { background: #0d0a05; display: flex; align-items: center; justify-content: center; min-height: 380px; overflow: hidden; }
   .modal-info-side { padding: 40px 32px; display: flex; flex-direction: column; justify-content: space-between; }
   .modal-cat { font-family: 'Montserrat', sans-serif; font-size: 9px; font-weight: 500; letter-spacing: 0.36em; text-transform: uppercase; color: #c59c55; margin-bottom: 10px; }
   .modal-name { font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 300; color: #f0e4cc; line-height: 1.1; margin-bottom: 8px; }
@@ -279,7 +279,7 @@ const globalStyles = `
   .ct-info-icon { width: 38px; height: 38px; margin-bottom: 16px; opacity: 0.7; }
   .ct-info-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; color: #e8dcc8; margin-bottom: 8px; }
   .ct-info-text { font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 300; color: #5a4a30; line-height: 1.8; letter-spacing: 0.03em; }
-  .ct-info-link { font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: #c59c55; text-decoration: none; display: inline-block; margin-top: 12px; transition: opacity 0.2s; cursor: pointer; }
+  .ct-info-link { font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: #c59c55; text-decoration: none; display: inline-block; margin-top: 12px; transition: opacity 0.2s; cursor: pointer; background: none; border: none; padding: 0; }
   .ct-info-link:hover { opacity: 0.7; }
 
   .ct-locations { border-top: 1px solid rgba(197,156,85,0.08); padding-top: 32px; }
@@ -296,7 +296,7 @@ const globalStyles = `
   .ct-f-brandtag { font-family: 'Montserrat', sans-serif; font-size: 8px; font-weight: 500; letter-spacing: 0.45em; text-transform: uppercase; color: #3a3020; margin-bottom: 14px; }
   .ct-f-about { font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 300; color: #3a3020; line-height: 1.8; }
   .ct-f-col-title { font-family: 'Montserrat', sans-serif; font-size: 9px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: #c59c55; margin-bottom: 16px; }
-  .ct-f-link { display: block; font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 300; color: #3a3020; margin-bottom: 10px; letter-spacing: 0.04em; cursor: pointer; text-decoration: none; transition: color 0.2s; }
+  .ct-f-link { display: block; font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 300; color: #3a3020; margin-bottom: 10px; letter-spacing: 0.04em; cursor: pointer; text-decoration: none; transition: color 0.2s; background: none; border: none; padding: 0; text-align: left; width: 100%; }
   .ct-f-link:hover { color: #c59c55; }
   .ct-f-bottom { display: flex; justify-content: space-between; align-items: center; max-width: 1100px; margin: 0 auto; padding-top: 24px; border-top: 1px solid rgba(197,156,85,0.07); font-family: 'Montserrat', sans-serif; font-size: 9px; font-weight: 400; color: #2a2018; letter-spacing: 0.1em; }
 
@@ -690,8 +690,8 @@ function Home({ setPage, theme }) {
           <div className="grid md:grid-cols-3 gap-10">
             {displayPreviews.map((item) => (
               <div key={item.id} className="group cursor-pointer" onClick={goCollection}>
-                <div className="h-[380px] border border-[rgba(197,156,85,0.15)] relative overflow-hidden"
-                  style={{ backgroundImage: `url(${item.image_url})`, backgroundSize: "cover", backgroundPosition: "center" }}>
+                <div className="h-[380px] border border-[rgba(197,156,85,0.15)] relative overflow-hidden">
+                  <img src={item.image_url} alt={`${item.name} — Tiffany & Cris luxury collection`} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }} />
                   <div className="absolute inset-0 bg-black/40 flex items-end p-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "9px", fontWeight: 600, letterSpacing: "0.28em", textTransform: "uppercase", color: "#c59c55", border: "1px solid rgba(197,156,85,0.6)", padding: "10px 18px", background: "rgba(5,4,3,0.85)", width: "100%", textAlign: "center", display: "block" }}>View Collection →</span>
                   </div>
@@ -763,8 +763,11 @@ function WishlistPage({ user, wishlistIds, setPage, onWishlistToggle, onViewingR
             {items.map(bag => (
               <div className="product-card" key={bag.id} onClick={() => setModal(bag)}>
                 <div className="pc-img">
-                  <div className="pc-img-inner" style={bag.img ? { backgroundImage: `url(${bag.img})` } : {}} />
-                  <button className="pc-wish-btn on" onClick={e => { e.stopPropagation(); onWishlistToggle(bag.id); }}>♥</button>
+                  {bag.img
+                    ? <img className="pc-img-inner" src={bag.img} alt={`${bag.name} luxury ${bag.cat} — Tiffany & Cris`} loading="lazy" />
+                    : <div className="pc-img-inner" />
+                  }
+                  <button className="pc-wish-btn on" onClick={e => { e.stopPropagation(); onWishlistToggle(bag.id); }} aria-label={`Remove ${bag.name} from wishlist`}>♥</button>
                 </div>
                 <div className="pc-info">
                   <div className="pc-cat">{bag.cat}</div>
@@ -780,7 +783,12 @@ function WishlistPage({ user, wishlistIds, setPage, onWishlistToggle, onViewingR
         {modal && (
           <div className="modal-box">
             <button className="modal-close-btn" onClick={() => setModal(null)}>✕ Close</button>
-            <div className="modal-img-side" style={modal.img ? { backgroundImage: `url(${modal.img})` } : {}} />
+            <div className="modal-img-side">
+              {modal.img
+                ? <img src={modal.img} alt={`${modal.name} luxury ${modal.cat} — Tiffany & Cris`} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }} />
+                : null
+              }
+            </div>
             <div className="modal-info-side">
               <div>
                 <div className="modal-cat">{modal.cat}</div>
@@ -841,16 +849,16 @@ function Collection({ user, wishlistIds, onWishlistToggle, onViewingRequest, onA
 
   return (
     <div className="col-page">
-      <div className="col-hero">
+      <section className="col-hero" aria-label="Collection header">
         <div className="col-hero-eyebrow">Tiffany &amp; Cris</div>
         <h1 className="col-hero-title">The <em>Collection</em></h1>
         <p className="col-hero-sub">
           Each piece is a testament to restraint, material mastery,
           and the belief that true luxury requires no announcement.
         </p>
-      </div>
+      </section>
 
-      <div className="filter-bar">
+      <div className="filter-bar" role="toolbar" aria-label="Filter and sort products">
         <div className="filter-tabs">
           {TABS.map(tab => (
             <button key={tab} className={`filter-tab${activeTab === tab ? " active" : ""}`} onClick={() => setActiveTab(tab)}>{tab}</button>
@@ -866,17 +874,18 @@ function Collection({ user, wishlistIds, onWishlistToggle, onViewingRequest, onA
 
       <div className="product-grid-wrap">
         <div className="product-count">{filtered.length} piece{filtered.length !== 1 ? "s" : ""}</div>
-        <div className="product-grid">
+        <div className="product-grid" role="list">
           {filtered.map(bag => (
-            <div className="product-card" key={bag.id} onClick={() => setModal(bag)}>
+            <article className="product-card" key={bag.id} onClick={() => setModal(bag)} role="listitem" aria-label={`${bag.name} — ${bag.cat}`}>
               <div className="pc-img">
-                <div className="pc-img-inner" style={bag.img ? { backgroundImage: `url(${bag.img})` } : {}}>
-                  {!bag.img && bagSvgs[bag.id]}
-                </div>
+                {bag.img
+                  ? <img className="pc-img-inner" src={bag.img} alt={`${bag.name} luxury ${bag.cat} — Tiffany & Cris`} loading="lazy" />
+                  : <div className="pc-img-inner">{bagSvgs[bag.id]}</div>
+                }
                 <button
                   className={`pc-wish-btn${inWishlist(bag.id) ? " on" : ""}`}
                   onClick={e => { e.stopPropagation(); onWishlistToggle ? onWishlistToggle(bag.id) : onAuthRequired?.(); }}
-                  title={inWishlist(bag.id) ? "Remove from wishlist" : "Add to wishlist"}
+                  aria-label={inWishlist(bag.id) ? `Remove ${bag.name} from wishlist` : `Add ${bag.name} to wishlist`}
                 >
                   {inWishlist(bag.id) ? "♥" : "♡"}
                 </button>
@@ -885,7 +894,7 @@ function Collection({ user, wishlistIds, onWishlistToggle, onViewingRequest, onA
                 <div className="pc-cat">{bag.cat}</div>
                 <div className="pc-name">{bag.name}</div>
               </div>
-            </div>
+            </article>
           ))}
         </div>
       </div>
@@ -894,8 +903,11 @@ function Collection({ user, wishlistIds, onWishlistToggle, onViewingRequest, onA
         {modal && (
           <div className="modal-box">
             <button className="modal-close-btn" onClick={() => setModal(null)}>✕ Close</button>
-            <div className="modal-img-side" style={modal.img ? { backgroundImage: `url(${modal.img})` } : {}}>
-              {!modal.img && bagSvgs[modal.id]}
+            <div className="modal-img-side">
+              {modal.img
+                ? <img src={modal.img} alt={`${modal.name} luxury ${modal.cat} — Tiffany & Cris`} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }} />
+                : bagSvgs[modal.id]
+              }
             </div>
             <div className="modal-info-side">
               <div>
@@ -942,14 +954,14 @@ function Contact() {
 
   return (
     <div className="contact-page">
-      <div className="ct-hero">
+      <section className="ct-hero" aria-label="Contact header">
         <div className="ct-eyebrow">Tiffany &amp; Cris</div>
         <h1 className="ct-title">Reach the <em>Atelier</em></h1>
         <p className="ct-sub">
           We believe every conversation deserves the same care
           we pour into every stitch. We'd love to hear from you.
         </p>
-      </div>
+      </section>
 
       <div className="ct-body">
         <div>
@@ -1015,7 +1027,7 @@ function Contact() {
               {card.icon}
               <div className="ct-info-title">{card.title}</div>
               <p className="ct-info-text">{card.text}</p>
-              <a className="ct-info-link">{card.link} →</a>
+              <button className="ct-info-link" type="button">{card.link} →</button>
             </div>
           ))}
 
@@ -1034,7 +1046,7 @@ function Contact() {
         </div>
       </div>
 
-      <div className="ct-footer-strip">
+      <footer className="ct-footer-strip">
         <div className="ct-footer-grid">
           <div>
             <div className="ct-f-brand">Tiffany &amp; Cris</div>
@@ -1048,7 +1060,7 @@ function Contact() {
           ].map(col => (
             <div key={col.title}>
               <div className="ct-f-col-title">{col.title}</div>
-              {col.links.map(l => <a key={l} className="ct-f-link">{l}</a>)}
+              {col.links.map(l => <button key={l} className="ct-f-link" type="button">{l}</button>)}
             </div>
           ))}
         </div>
@@ -1056,7 +1068,7 @@ function Contact() {
           <span>© 2025 Tiffany &amp; Cris. All rights reserved.</span>
           <span style={{ letterSpacing: "0.35em" }}>✦ Manila · Paris · Milan ✦</span>
         </div>
-      </div>
+      </footer>
     </div>
   );
 }
@@ -1071,6 +1083,16 @@ export default function App() {
   const [wishlistIds, setWishlistIds] = useState(new Set());
   const [authModal, setAuthModal] = useState(null);
   const isAdmin = window.location.search.includes("admin");
+
+  useEffect(() => {
+    const titles = {
+      home: "Tiffany & Cris | Luxury Designer Bag Collections Manila",
+      collection: "The Collection | Tiffany & Cris Luxury Bags",
+      contact: "Contact Us | Tiffany & Cris Atelier Manila",
+      wishlist: "My Wishlist | Tiffany & Cris",
+    };
+    document.title = titles[page] || "Tiffany & Cris";
+  }, [page]);
 
   useEffect(() => {
     const alreadyAdmin = window.location.search.includes("admin");
@@ -1136,28 +1158,32 @@ export default function App() {
   return (
     <div data-theme={theme} style={{ minHeight: "100vh" }}>
       <style>{globalStyles}</style>
-      <Navbar
-        page={page} setPage={setPage} theme={theme} toggleTheme={toggleTheme}
-        user={user} onAuthOpen={() => setAuthModal("signin")} onSignOut={() => { supabase.auth.signOut().catch(() => {}); localStorage.clear(); sessionStorage.clear(); window.location.href = "/"; }}
-      />
-      {page === "home"     && <Home setPage={setPage} theme={theme}/>}
-      {page === "collection" && (
-        <Collection
-          user={user} wishlistIds={wishlistIds}
-          onWishlistToggle={handleWishlistToggle}
-          onViewingRequest={handleViewingRequest}
-          onAuthRequired={() => setAuthModal("signin")}
+      <header>
+        <Navbar
+          page={page} setPage={setPage} theme={theme} toggleTheme={toggleTheme}
+          user={user} onAuthOpen={() => setAuthModal("signin")} onSignOut={() => { supabase.auth.signOut().catch(() => {}); localStorage.clear(); sessionStorage.clear(); window.location.href = "/"; }}
         />
-      )}
-      {page === "wishlist" && (
-        <WishlistPage
-          user={user} wishlistIds={wishlistIds} setPage={setPage}
-          onWishlistToggle={handleWishlistToggle}
-          onViewingRequest={handleViewingRequest}
-          onAuthRequired={() => setAuthModal("signin")}
-        />
-      )}
-      {page === "contact"  && <Contact/>}
+      </header>
+      <main id="main-content">
+        {page === "home"     && <Home setPage={setPage} theme={theme}/>}
+        {page === "collection" && (
+          <Collection
+            user={user} wishlistIds={wishlistIds}
+            onWishlistToggle={handleWishlistToggle}
+            onViewingRequest={handleViewingRequest}
+            onAuthRequired={() => setAuthModal("signin")}
+          />
+        )}
+        {page === "wishlist" && (
+          <WishlistPage
+            user={user} wishlistIds={wishlistIds} setPage={setPage}
+            onWishlistToggle={handleWishlistToggle}
+            onViewingRequest={handleViewingRequest}
+            onAuthRequired={() => setAuthModal("signin")}
+          />
+        )}
+        {page === "contact"  && <Contact/>}
+      </main>
 
       {authModal && (
         <AuthModal mode={authModal} onClose={() => setAuthModal(null)} onSuccess={() => setAuthModal(null)} />
