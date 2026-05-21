@@ -1,5 +1,13 @@
 import { useState, useEffect } from "react";
 import { supabase } from "./supabase";
+
+const SUPA_URL = "https://ldvsjfgeornlispaefjf.supabase.co";
+const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkdnNqZmdlb3JubGlzcGFlZmpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4OTIwODAsImV4cCI6MjA5MzQ2ODA4MH0.IpT6BlTpWekM8nbk21gtkkkv_693wR8nRP6uuN32YTY";
+const supaHeaders = { apikey: SUPA_KEY, Authorization: `Bearer ${SUPA_KEY}` };
+async function supaFetch(path) {
+  const res = await fetch(`${SUPA_URL}/rest/v1/${path}`, { headers: supaHeaders });
+  return res.json();
+}
 import AdminPage from "./AdminPage";
 import lvTwist from "./assets/twist.avif";
 import lvLoop from "./assets/loop.avif";
@@ -213,7 +221,7 @@ const globalStyles = `
   .modal-box { background: #0a0804; border: 1px solid rgba(197,156,85,0.15); max-width: 760px; width: 100%; display: grid; grid-template-columns: 1fr 1fr; max-height: 90vh; overflow-y: auto; position: relative; }
   .modal-close-btn { position: absolute; top: 14px; right: 16px; background: none; border: none; font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: #4a3e28; cursor: pointer; transition: color 0.2s; z-index: 5; }
   .modal-close-btn:hover { color: #c59c55; }
-  .modal-img-side { background: #0d0a05; display: flex; align-items: center; justify-content: center; min-height: 380px; overflow: hidden; }
+  .modal-img-side { position: relative; background: #0d0a05; display: flex; align-items: center; justify-content: center; min-height: 380px; overflow: hidden; }
   .modal-info-side { padding: 40px 32px; display: flex; flex-direction: column; justify-content: space-between; }
   .modal-cat { font-family: 'Montserrat', sans-serif; font-size: 9px; font-weight: 500; letter-spacing: 0.36em; text-transform: uppercase; color: #c59c55; margin-bottom: 10px; }
   .modal-name { font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 300; color: #f0e4cc; line-height: 1.1; margin-bottom: 8px; }
@@ -228,6 +236,13 @@ const globalStyles = `
   .modal-btn-primary:hover { background: #d4aa65; }
   .modal-btn-ghost { width: 100%; font-family: 'Montserrat', sans-serif; font-size: 9.5px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: #c59c55; background: transparent; border: 1px solid rgba(197,156,85,0.35); padding: 14px; cursor: pointer; transition: border-color 0.2s, background 0.2s; }
   .modal-btn-ghost:hover { border-color: #c59c55; background: rgba(197,156,85,0.06); }
+  .modal-carousel-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.55); border: 1px solid rgba(197,156,85,0.3); color: #c59c55; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; line-height: 1; z-index: 2; transition: background 0.2s; padding: 0; }
+  .modal-carousel-arrow:hover { background: rgba(197,156,85,0.25); }
+  .modal-carousel-prev { left: 10px; }
+  .modal-carousel-next { right: 10px; }
+  .modal-carousel-dots { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 2; }
+  .modal-carousel-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(197,156,85,0.35); border: none; cursor: pointer; padding: 0; transition: background 0.2s; }
+  .modal-carousel-dot.active { background: #c59c55; }
 
   /* ── CONTACT ───────────────────────────────────────── */
   .contact-page { background: #050403; min-height: 100vh; }
@@ -714,20 +729,27 @@ function WishlistPage({ user, wishlistIds, setPage, onWishlistToggle, onViewingR
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(null);
+  const [wishCarouselIdx, setWishCarouselIdx] = useState(0);
+
+  useEffect(() => { setWishCarouselIdx(0); }, [modal?.id]);
 
   useEffect(() => {
     if (!user) { setLoading(false); return; }
     if (wishlistIds.size === 0) { setItems([]); setLoading(false); return; }
-    supabase.from("collections").select("*").in("id", [...wishlistIds])
-      .then(({ data, error }) => {
-        if (!error && data) {
+    const ids = [...wishlistIds].join(",");
+    supaFetch(`collections?select=*&id=in.(${ids})`)
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
           setItems(data.map(item => ({
             id: item.id, name: item.name, cat: item.category, price: item.price,
-            img: item.image_url, specs: item.specs || {}, tagline: item.tagline,
+            img: item.image_url,
+            imgs: item.images?.length ? item.images : item.image_url ? [item.image_url] : [],
+            specs: item.specs || {}, tagline: item.tagline,
           })));
         }
         setLoading(false);
-      });
+      })
+      .catch(() => setLoading(false));
   }, [wishlistIds, user]);
 
   if (!user) {
@@ -784,10 +806,26 @@ function WishlistPage({ user, wishlistIds, setPage, onWishlistToggle, onViewingR
           <div className="modal-box">
             <button className="modal-close-btn" onClick={() => setModal(null)}>✕ Close</button>
             <div className="modal-img-side">
-              {modal.img
-                ? <img src={modal.img} alt={`${modal.name} luxury ${modal.cat} — Tiffany & Cris`} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }} />
-                : null
-              }
+              {(modal.imgs?.length > 0 || modal.img) ? (
+                <>
+                  <img
+                    src={modal.imgs?.length > 0 ? modal.imgs[wishCarouselIdx] : modal.img}
+                    alt={`${modal.name} luxury ${modal.cat} — Tiffany & Cris`}
+                    style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }}
+                  />
+                  {modal.imgs?.length > 1 && (
+                    <>
+                      <button className="modal-carousel-arrow modal-carousel-prev" onClick={() => setWishCarouselIdx(i => (i - 1 + modal.imgs.length) % modal.imgs.length)}>‹</button>
+                      <button className="modal-carousel-arrow modal-carousel-next" onClick={() => setWishCarouselIdx(i => (i + 1) % modal.imgs.length)}>›</button>
+                      <div className="modal-carousel-dots">
+                        {modal.imgs.map((_, i) => (
+                          <button key={i} className={`modal-carousel-dot${i === wishCarouselIdx ? " active" : ""}`} onClick={() => setWishCarouselIdx(i)} />
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </>
+              ) : null}
             </div>
             <div className="modal-info-side">
               <div>
@@ -820,15 +858,20 @@ function Collection({ user, wishlistIds, onWishlistToggle, onViewingRequest, onA
   const [sort, setSort] = useState("");
   const [modal, setModal] = useState(null);
   const [liveBags, setLiveBags] = useState(null);
+  const [carouselIdx, setCarouselIdx] = useState(0);
+
+  useEffect(() => { setCarouselIdx(0); }, [modal?.id]);
 
   useEffect(() => {
-    supabase.from("collections").select("*").order("created_at", { ascending: false })
-      .then(({ data, error }) => {
-        if (!error && data?.length > 0) {
+    supaFetch("collections?select=*&order=created_at.desc")
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
           setLiveBags(data.map(item => ({
             id: item.id, name: item.name, cat: item.category, price: item.price,
             badge: item.badge, badgeType: item.badge_type, desc: item.description,
-            tagline: item.tagline, img: item.image_url, specs: item.specs || {}, colors: [],
+            tagline: item.tagline, img: item.image_url,
+            imgs: item.images?.length ? item.images : item.image_url ? [item.image_url] : [],
+            specs: item.specs || {}, colors: [],
           })));
         } else { setLiveBags(null); }
       })
@@ -904,10 +947,26 @@ function Collection({ user, wishlistIds, onWishlistToggle, onViewingRequest, onA
           <div className="modal-box">
             <button className="modal-close-btn" onClick={() => setModal(null)}>✕ Close</button>
             <div className="modal-img-side">
-              {modal.img
-                ? <img src={modal.img} alt={`${modal.name} luxury ${modal.cat} — Tiffany & Cris`} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }} />
-                : bagSvgs[modal.id]
-              }
+              {(modal.imgs?.length > 0 || modal.img) ? (
+                <>
+                  <img
+                    src={modal.imgs?.length > 0 ? modal.imgs[carouselIdx] : modal.img}
+                    alt={`${modal.name} luxury ${modal.cat} — Tiffany & Cris`}
+                    style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }}
+                  />
+                  {modal.imgs?.length > 1 && (
+                    <>
+                      <button className="modal-carousel-arrow modal-carousel-prev" onClick={() => setCarouselIdx(i => (i - 1 + modal.imgs.length) % modal.imgs.length)}>‹</button>
+                      <button className="modal-carousel-arrow modal-carousel-next" onClick={() => setCarouselIdx(i => (i + 1) % modal.imgs.length)}>›</button>
+                      <div className="modal-carousel-dots">
+                        {modal.imgs.map((_, i) => (
+                          <button key={i} className={`modal-carousel-dot${i === carouselIdx ? " active" : ""}`} onClick={() => setCarouselIdx(i)} />
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </>
+              ) : bagSvgs[modal.id]}
             </div>
             <div className="modal-info-side">
               <div>
