@@ -9,6 +9,8 @@ async function supaFetch(path) {
   return res.json();
 }
 import AdminPage from "./AdminPage";
+import LegalPoliciesPage from "./LegalPoliciesPage";
+import Footer from "./Footer";
 import lvTwist from "./assets/twist.avif";
 import lvLoop from "./assets/loop.avif";
 import lvSpeedy from "./assets/speedy.avif";
@@ -315,54 +317,112 @@ const globalStyles = `
   .ct-f-link:hover { color: #c59c55; }
   .ct-f-bottom { display: flex; justify-content: space-between; align-items: center; max-width: 1100px; margin: 0 auto; padding-top: 24px; border-top: 1px solid rgba(197,156,85,0.07); font-family: 'Montserrat', sans-serif; font-size: 9px; font-weight: 400; color: #2a2018; letter-spacing: 0.1em; }
 
-  /* ── LIGHT MODE ────────────────────────────────────── */
-  [data-theme="light"] .tc-navbar.scrolled { background: rgba(250,248,244,0.96) !important; border-bottom-color: rgba(197,156,85,0.15) !important; }
-  [data-theme="light"] .tc-nav-link { color: #6a5a40; }
-  [data-theme="light"] .tc-brand-name { color: #1a1208; }
-  [data-theme="light"] .tc-brand-sub { color: #9a8a70; }
-  [data-theme="light"] .hero-bg { background-color: #faf8f4 !important; background-image: radial-gradient(ellipse 70% 60% at 50% 45%, rgba(197,156,85,0.1) 0%, transparent 75%) !important; }
-  [data-theme="light"] .hero-title-main { color: #1a1208; }
-  [data-theme="light"] .hero-desc { color: #6a5a40; }
-  [data-theme="light"] .btn-secondary { background: rgba(0,0,0,0.06); color: #3a2a10; border-color: rgba(90,74,40,0.35); }
-  [data-theme="light"] .btn-secondary:hover { background: rgba(0,0,0,0.14); }
-  [data-theme="light"] .pc-wish-btn { background: rgba(0,0,0,0.06); border-color: rgba(90,74,40,0.25); color: #5a4a30; }
-  [data-theme="light"] .pc-wish-btn:hover { background: rgba(0,0,0,0.14); color: #c59c55; border-color: #c59c55; }
-  [data-theme="light"] .grain-overlay { opacity: 0.05; }
-  [data-theme="light"] .col-page { background: #faf8f4; }
-  [data-theme="light"] .col-hero { background: #faf8f4 !important; border-bottom-color: rgba(197,156,85,0.1); }
-  [data-theme="light"] .col-hero-title { color: #1a1208; }
-  [data-theme="light"] .col-hero-sub { color: #6a5a40; }
-  [data-theme="light"] .filter-bar { background: #f0ebe0 !important; }
-  [data-theme="light"] .filter-tab { color: #6a5a40; }
-  [data-theme="light"] .product-count { color: #9a8a70; }
-  [data-theme="light"] .pc-img { background: #f0ebe0; }
-  [data-theme="light"] .pc-name { color: #1a1208; }
-  [data-theme="light"] .modal-box { background: #faf8f4 !important; }
-  [data-theme="light"] .modal-img-side { background-color: #f0ebe0 !important; }
-  [data-theme="light"] .modal-name { color: #1a1208; }
-  [data-theme="light"] .modal-tagline { color: #8a7a60; }
-  [data-theme="light"] .ms-val { color: #4a3a28; }
-  [data-theme="light"] .contact-page { background: #faf8f4; }
-  [data-theme="light"] .ct-hero { background: #faf8f4 !important; border-bottom-color: rgba(197,156,85,0.1); }
-  [data-theme="light"] .ct-title { color: #1a1208; }
-  [data-theme="light"] .ct-sub { color: #6a5a40; }
-  [data-theme="light"] .ct-label { color: #6a5a40; }
-  [data-theme="light"] .ct-input, [data-theme="light"] .ct-textarea, [data-theme="light"] .ct-select { background: #fff !important; color: #1a1208 !important; border-color: rgba(197,156,85,0.2) !important; }
-  [data-theme="light"] .ct-input::placeholder, [data-theme="light"] .ct-textarea::placeholder { color: #c0b090; }
-  [data-theme="light"] .ct-info-card { background: #fff !important; border-color: rgba(197,156,85,0.15) !important; }
-  [data-theme="light"] .ct-info-title { color: #1a1208; }
-  [data-theme="light"] .ct-info-text { color: #6a5a40; }
-  [data-theme="light"] .ct-loc-city { color: #1a1208; }
-  [data-theme="light"] .ct-loc-addr { color: #8a7a60; }
-  [data-theme="light"] .ct-footer-strip { background: #f0ebe0 !important; }
-  [data-theme="light"] .ct-f-brand { color: #1a1208; }
-  [data-theme="light"] .ct-f-about { color: #6a5a40; }
-  [data-theme="light"] .ct-f-link { color: #6a5a40; }
-  [data-theme="light"] .ct-f-bottom { color: #9a8a70; }
-  [data-theme="light"] .ct-success-title { color: #1a1208; }
-  [data-theme="light"] .ct-success-msg { color: #6a5a40; }
+  /* ── LIGHT MODE (Vintage Parchment & Tuscan Cognac) ── */
+  [data-theme="light"] {
+    --tc-bg: #EDE5D8;
+    --tc-bg-rgb: 237, 229, 216;
+    --tc-surface: #DFD3C1;
+    --tc-card: #F5EFE5;
+    --tc-heading: #201812;
+    --tc-text: #635140;
+    --tc-muted: #9C8B77;
+    --tc-gold: #9E6728;
+    --tc-gold-rgb: 158, 103, 40;
+    --tc-border: rgba(158, 103, 40, 0.22);
+    --tc-btn-sec-bg: rgba(158, 103, 40, 0.08);
+  }
+
+  [data-theme="light"] .tc-navbar.scrolled { background: rgba(var(--tc-bg-rgb), 0.96) !important; border-bottom-color: var(--tc-border) !important; }
+  [data-theme="light"] .tc-nav-link { color: var(--tc-text); }
+  [data-theme="light"] .tc-nav-link:hover, [data-theme="light"] .tc-nav-link.active { color: var(--tc-gold); }
+  [data-theme="light"] .tc-brand-name { color: var(--tc-heading); }
+  [data-theme="light"] .tc-brand-sub { color: var(--tc-muted); }
+  [data-theme="light"] .hero-bg { background-color: var(--tc-bg) !important; background-image: radial-gradient(ellipse 70% 60% at 50% 45%, rgba(var(--tc-gold-rgb), 0.12) 0%, transparent 75%) !important; }
+  [data-theme="light"] .hero-title-main { color: var(--tc-heading); }
+  [data-theme="light"] .hero-title-sub  { color: var(--tc-gold) !important; }
+  [data-theme="light"] .hero-desc { color: var(--tc-text); }
+  [data-theme="light"] .btn-primary { background: var(--tc-gold); color: #1a1208; }
+  [data-theme="light"] .btn-primary:hover { filter: brightness(1.08); }
+  [data-theme="light"] .btn-secondary { background: var(--tc-btn-sec-bg); color: var(--tc-heading); border-color: var(--tc-gold); }
+  [data-theme="light"] .btn-secondary:hover { background: rgba(var(--tc-gold-rgb), 0.18); }
+  [data-theme="light"] .pc-wish-btn { background: var(--tc-btn-sec-bg); border-color: var(--tc-border); color: var(--tc-text); }
+  [data-theme="light"] .pc-wish-btn:hover { background: rgba(var(--tc-gold-rgb), 0.16); color: var(--tc-gold); border-color: var(--tc-gold); }
+  [data-theme="light"] .grain-overlay { opacity: 0.04; }
+  [data-theme="light"] .col-page { background: var(--tc-bg); }
+  [data-theme="light"] .col-hero { background: var(--tc-bg) !important; border-bottom-color: var(--tc-border); }
+  [data-theme="light"] .col-hero-title { color: var(--tc-heading); }
+  [data-theme="light"] .col-hero-title em { color: var(--tc-gold); }
+  [data-theme="light"] .col-hero-sub { color: var(--tc-text); }
+  [data-theme="light"] .filter-bar { background: var(--tc-surface) !important; border-bottom-color: var(--tc-border); }
+  [data-theme="light"] .filter-tab { color: var(--tc-text); }
+  [data-theme="light"] .filter-tab:hover, [data-theme="light"] .filter-tab.active { color: var(--tc-gold); border-bottom-color: var(--tc-gold); }
+  [data-theme="light"] .product-count { color: var(--tc-muted); }
+  [data-theme="light"] .pc-img { background: var(--tc-surface); }
+  [data-theme="light"] .pc-name { color: var(--tc-heading); }
+  [data-theme="light"] .modal-box { background: var(--tc-card) !important; border: 1px solid var(--tc-border); }
+  [data-theme="light"] .modal-img-side { background-color: var(--tc-surface) !important; }
+  [data-theme="light"] .modal-name { color: var(--tc-heading); }
+  [data-theme="light"] .modal-tagline { color: var(--tc-muted); }
+  [data-theme="light"] .ms-val { color: var(--tc-heading); }
+  [data-theme="light"] .contact-page { background: var(--tc-bg); }
+  [data-theme="light"] .ct-hero { background: var(--tc-bg) !important; border-bottom-color: var(--tc-border); }
+  [data-theme="light"] .ct-title { color: var(--tc-heading); }
+  [data-theme="light"] .ct-sub { color: var(--tc-text); }
+  [data-theme="light"] .ct-label { color: var(--tc-text); }
+  [data-theme="light"] .ct-input, [data-theme="light"] .ct-textarea, [data-theme="light"] .ct-select { background: var(--tc-card) !important; color: var(--tc-heading) !important; border-color: var(--tc-border) !important; }
+  [data-theme="light"] .ct-input::placeholder, [data-theme="light"] .ct-textarea::placeholder { color: var(--tc-muted); }
+  [data-theme="light"] .ct-info-card { background: var(--tc-card) !important; border-color: var(--tc-border) !important; }
+  [data-theme="light"] .ct-info-title { color: var(--tc-heading); }
+  [data-theme="light"] .ct-info-text { color: var(--tc-text); }
+  [data-theme="light"] .ct-loc-city { color: var(--tc-heading); }
+  [data-theme="light"] .ct-loc-addr { color: var(--tc-muted); }
+  [data-theme="light"] .ct-footer-strip { background: var(--tc-surface) !important; border-top-color: var(--tc-border) !important; }
+  [data-theme="light"] .ct-f-brand { color: var(--tc-heading); }
+  [data-theme="light"] .ct-f-about { color: var(--tc-text); }
+  [data-theme="light"] .ct-f-link { color: var(--tc-text); }
+  [data-theme="light"] .ct-f-bottom { color: var(--tc-muted); border-top-color: var(--tc-border); }
+  [data-theme="light"] .ct-success-title { color: var(--tc-heading); }
+  [data-theme="light"] .ct-success-msg { color: var(--tc-text); }
+
+  /* Modal Light Mode */
+  [data-theme="light"] .modal-bg { background: rgba(32, 24, 18, 0.48); backdrop-filter: blur(8px); }
+  [data-theme="light"] .modal-close-btn { color: var(--tc-muted); }
+  [data-theme="light"] .modal-close-btn:hover { color: var(--tc-gold); }
+  [data-theme="light"] .modal-btn-ghost { color: var(--tc-gold); border-color: var(--tc-border); }
+  [data-theme="light"] .modal-btn-ghost:hover { border-color: var(--tc-gold); background: rgba(var(--tc-gold-rgb), 0.08); }
+  [data-theme="light"] .modal-btn-primary { background: var(--tc-gold); color: #ffffff; }
+  [data-theme="light"] .modal-price { color: var(--tc-gold); }
+  [data-theme="light"] .modal-cat { color: var(--tc-gold); }
+  [data-theme="light"] .ms-label { color: var(--tc-muted); }
+
+  /* Auth Modal Light Mode */
+  [data-theme="light"] .auth-overlay { background: rgba(32, 24, 18, 0.52); backdrop-filter: blur(8px); }
+  [data-theme="light"] .auth-card { background: var(--tc-card) !important; border: 1px solid var(--tc-border) !important; box-shadow: 0 25px 70px rgba(32, 24, 18, 0.25) !important; }
+  [data-theme="light"] .auth-brand { color: var(--tc-heading) !important; }
+  [data-theme="light"] .auth-hint { color: var(--tc-muted) !important; }
+  [data-theme="light"] .auth-tabs { border-color: var(--tc-border) !important; background: rgba(158, 103, 40, 0.06); }
+  [data-theme="light"] .auth-tab { color: var(--tc-text) !important; }
+  [data-theme="light"] .auth-tab.on { background: rgba(var(--tc-gold-rgb), 0.18) !important; color: var(--tc-gold) !important; font-weight: 600; }
+  [data-theme="light"] .auth-label { color: var(--tc-text) !important; }
+  [data-theme="light"] .auth-input { background: var(--tc-bg) !important; color: var(--tc-heading) !important; border-color: var(--tc-border) !important; }
+  [data-theme="light"] .auth-input:focus { border-color: var(--tc-gold) !important; box-shadow: 0 0 0 1px var(--tc-gold); }
+  [data-theme="light"] .auth-input::placeholder { color: var(--tc-muted) !important; }
+  [data-theme="light"] .auth-submit { background: var(--tc-gold) !important; color: #ffffff !important; font-weight: 600; }
+  [data-theme="light"] .auth-submit:hover { filter: brightness(1.08); }
+  [data-theme="light"] .auth-submit:disabled { background: rgba(var(--tc-gold-rgb), 0.3) !important; color: var(--tc-muted) !important; }
+  [data-theme="light"] .auth-back { color: var(--tc-muted) !important; }
+  [data-theme="light"] .auth-back:hover { color: var(--tc-gold) !important; }
 
   /* ── AUTH MODAL ────────────────────────────────────────── */
+  .auth-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.88);
+    backdrop-filter: blur(8px);
+    z-index: 500;
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+    transition: background 0.3s;
+  }
   .auth-card { background: #0a0804; border: 1px solid rgba(197,156,85,0.2); border-radius: 8px; padding: 44px 40px; width: 100%; max-width: 400px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
   .auth-brand { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 300; color: #f0e4cc; margin-bottom: 4px; }
   .auth-hint { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: #5a4a30; margin-bottom: 28px; font-family: 'Montserrat', sans-serif; }
@@ -386,6 +446,13 @@ const globalStyles = `
   .product-card:hover .pc-wish-btn { opacity: 1; }
   .pc-wish-btn.on { opacity: 1; color: #c59c55; border-color: rgba(197,156,85,0.5); }
   .pc-wish-btn:hover { background: rgba(197,156,85,0.15); color: #c59c55; border-color: #c59c55; }
+
+  /* ── LEGAL & POLICY RESPONSIVE ── */
+  @media (max-width: 860px) {
+    .policy-grid { grid-template-columns: 1fr !important; gap: 24px !important; }
+    .policy-sidebar { display: none !important; }
+    .ct-footer-grid { grid-template-columns: 1fr !important; gap: 36px !important; }
+  }
 `;
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -528,7 +595,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
   }
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.88)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px" }} onClick={onClose}>
+    <div className="auth-overlay" onClick={onClose}>
       <div className="auth-card" onClick={e => e.stopPropagation()}>
         <div className="auth-brand">Tiffany &amp; Cris</div>
         <div className="auth-hint">Member Access</div>
@@ -565,7 +632,7 @@ function AuthModal({ mode, onClose, onSuccess }) {
 }
 
 
-function Navbar({ page, setPage, theme, toggleTheme, user, onAuthOpen, onSignOut }) {
+function Navbar({ page, setPage, theme, toggleTheme, user, onAuthOpen, onSignOut, onOpenLegal }) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   useEffect(() => {
@@ -618,6 +685,7 @@ function Navbar({ page, setPage, theme, toggleTheme, user, onAuthOpen, onSignOut
             <button className="tc-mobile-link" onClick={() => { onAuthOpen(); setMenuOpen(false); }}>Sign In</button>
           )}
           <button className="tc-mobile-link" onClick={() => go("contact")}>Contact</button>
+          <button className="tc-mobile-link" onClick={() => { if (onOpenLegal) onOpenLegal("terms"); else go("legal"); setMenuOpen(false); }}>Terms &amp; Policies</button>
           <button className="tc-mobile-link" onClick={() => { toggleTheme(); setMenuOpen(false); }} style={{ fontSize: "20px" }}>
             {theme === "dark" ? "☀" : "☾"}
           </button>
@@ -652,11 +720,12 @@ function Home({ setPage, theme }) {
   const displayPreviews = previews ?? defaultPreviews;
 
   const isLight      = theme === 'light';
-  const heritageBg   = isLight ? '#f5f0e8' : 'black';
-  const previewBg    = isLight ? '#faf8f4' : '#050403';
-  const headingColor = isLight ? '#1a1208' : '#f0e4cc';
-  const accentSpan   = isLight ? '#1a1208' : '#ffffff';
-  const bodyTextClr  = isLight ? '#6a5a40' : '#9a8a70';
+  const heritageBg   = isLight ? 'var(--tc-surface, #DFD3C1)' : 'black';
+  const previewBg    = isLight ? 'var(--tc-bg, #EDE5D8)' : '#050403';
+  const headingColor = isLight ? 'var(--tc-heading, #201812)' : '#f0e4cc';
+  const accentSpan   = isLight ? 'var(--tc-heading, #201812)' : '#ffffff';
+  const bodyTextClr  = isLight ? 'var(--tc-text, #635140)' : '#9a8a70';
+  const goldClr      = isLight ? 'var(--tc-gold, #9E6728)' : '#c59c55';
 
   return (
     <div className="hero-bg relative w-full min-h-screen flex flex-col overflow-hidden" style={{ fontFamily: "'Montserrat', sans-serif" }}>
@@ -677,18 +746,18 @@ function Home({ setPage, theme }) {
           <button className="btn-primary" onClick={goCollection}>Explore Collection</button>
           <button className="btn-secondary" onClick={goContact}>Private Viewing</button>
         </div>
-        <div className="fade-in delay-5 mt-16 flex items-center gap-4" style={{ color: "#ddd9d2", fontSize: "9px", letterSpacing: "0.4em", textTransform: "uppercase", fontFamily: "'Montserrat', sans-serif" }}>
-          <span style={{ width: 60, height: 1, background: "rgba(235,221,221,0.2)", display: "inline-block" }}/>
+        <div className="fade-in delay-5 mt-16 flex items-center gap-4" style={{ color: isLight ? "var(--tc-muted, #9C8B77)" : "#ddd9d2", fontSize: "9px", letterSpacing: "0.4em", textTransform: "uppercase", fontFamily: "'Montserrat', sans-serif" }}>
+          <span style={{ width: 60, height: 1, background: isLight ? "var(--tc-border, rgba(158,103,40,0.3))" : "rgba(235,221,221,0.2)", display: "inline-block" }}/>
           Exclusively Crafted
-          <span style={{ width: 60, height: 1, background: "rgba(228,220,207,0.2)", display: "inline-block" }}/>
+          <span style={{ width: 60, height: 1, background: isLight ? "var(--tc-border, rgba(158,103,40,0.3))" : "rgba(228,220,207,0.2)", display: "inline-block" }}/>
         </div>
       </div>
 
       <section className="w-full py-40 px-6 text-center border-t border-[rgba(197,156,85,0.08)]" style={{ background: heritageBg }}>
         <div className="max-w-3xl mx-auto">
-          <div style={{ fontSize: "11px", letterSpacing: "0.4em", textTransform: "uppercase", color: "#c59c55", marginBottom: "20px", fontFamily: "'Montserrat', sans-serif" }}>Our Heritage</div>
+          <div style={{ fontSize: "11px", letterSpacing: "0.4em", textTransform: "uppercase", color: goldClr, marginBottom: "20px", fontFamily: "'Montserrat', sans-serif" }}>Our Heritage</div>
           <h2 className="font-cormorant" style={{ fontSize: "56px", color: headingColor, fontWeight: 400, lineHeight: 1.2, marginBottom: "24px" }}>
-            Where <span style={{ color: accentSpan }}>obsidian</span> meets <span style={{ color: "#c59c55" }}>gold.</span>
+            Where <span style={{ color: accentSpan }}>obsidian</span> meets <span style={{ color: goldClr }}>gold.</span>
           </h2>
           <p style={{ color: bodyTextClr, fontSize: "15px", lineHeight: 1.8, maxWidth: "520px", margin: "0 auto", fontFamily: "'Montserrat', sans-serif" }}>
             Each Tiffany &amp; Cris piece is carefully curated from the world's most renowned ateliers — from the finest Italian leathers to Parisian hand-finished clasps — ensuring every item reflects timeless luxury and craftsmanship.
@@ -698,9 +767,9 @@ function Home({ setPage, theme }) {
 
       <section className="w-full py-40 px-6 text-center border-t border-[rgba(197,156,85,0.08)]" style={{ background: previewBg }}>
         <div className="max-w-6xl mx-auto">
-          <div style={{ fontSize: "11px", letterSpacing: "0.4em", textTransform: "uppercase", color: "#c59c55", marginBottom: "18px", fontFamily: "'Montserrat', sans-serif" }}>Collections Preview</div>
+          <div style={{ fontSize: "11px", letterSpacing: "0.4em", textTransform: "uppercase", color: goldClr, marginBottom: "18px", fontFamily: "'Montserrat', sans-serif" }}>Collections Preview</div>
           <h2 className="font-cormorant" style={{ fontSize: "54px", color: headingColor, fontWeight: 400, marginBottom: "60px", lineHeight: 1.2 }}>
-            A glimpse into <span style={{ color: "#c59c55" }}>timeless pieces</span>
+            A glimpse into <span style={{ color: goldClr }}>timeless pieces</span>
           </h2>
           <div className="grid md:grid-cols-3 gap-10">
             {displayPreviews.map((item) => (
@@ -711,7 +780,7 @@ function Home({ setPage, theme }) {
                     <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "9px", fontWeight: 600, letterSpacing: "0.28em", textTransform: "uppercase", color: "#c59c55", border: "1px solid rgba(197,156,85,0.6)", padding: "10px 18px", background: "rgba(5,4,3,0.85)", width: "100%", textAlign: "center", display: "block" }}>View Collection →</span>
                   </div>
                 </div>
-                <p className="mt-4 text-sm text-[#9a8a70] font-montserrat tracking-widest uppercase">{item.name}</p>
+                <p className="mt-4 text-sm font-montserrat tracking-widest uppercase" style={{ color: isLight ? "var(--tc-muted, #9C8B77)" : "#9a8a70" }}>{item.name}</p>
               </div>
             ))}
           </div>
@@ -1104,30 +1173,6 @@ function Contact() {
           </div>
         </div>
       </div>
-
-      <footer className="ct-footer-strip">
-        <div className="ct-footer-grid">
-          <div>
-            <div className="ct-f-brand">Tiffany &amp; Cris</div>
-            <div className="ct-f-brandtag">Luxury Collections</div>
-            <p className="ct-f-about">Handcrafted luxury bags born in Manila, finished in Florence — for those who carry the world beautifully.</p>
-          </div>
-          {[
-            { title: "Navigate", links: ["Home", "Collection", "Our Story", "Private Viewing"] },
-            { title: "Legal",    links: ["Privacy Policy", "Terms of Service", "Authenticity", "Returns"] },
-            { title: "Follow",   links: ["Instagram", "Pinterest", "Facebook", "TikTok"] },
-          ].map(col => (
-            <div key={col.title}>
-              <div className="ct-f-col-title">{col.title}</div>
-              {col.links.map(l => <button key={l} className="ct-f-link" type="button">{l}</button>)}
-            </div>
-          ))}
-        </div>
-        <div className="ct-f-bottom">
-          <span>© 2025 Tiffany &amp; Cris. All rights reserved.</span>
-          <span style={{ letterSpacing: "0.35em" }}>✦ Manila · Paris · Milan ✦</span>
-        </div>
-      </footer>
     </div>
   );
 }
@@ -1137,6 +1182,7 @@ function Contact() {
    ═══════════════════════════════════════════════════════════════════ */
 export default function App() {
   const [page, setPage] = useState("home");
+  const [policyTab, setPolicyTab] = useState("terms");
   const [theme, setTheme] = useState(() => localStorage.getItem("tc-theme") || "dark");
   const [user, setUser] = useState(null);
   const [wishlistIds, setWishlistIds] = useState(new Set());
@@ -1149,9 +1195,38 @@ export default function App() {
       collection: "The Collection | Tiffany & Cris Luxury Bags",
       contact: "Contact Us | Tiffany & Cris Atelier Manila",
       wishlist: "My Wishlist | Tiffany & Cris",
+      legal: "Legal Policies & Terms | Tiffany & Cris Luxury Collection",
     };
     document.title = titles[page] || "Tiffany & Cris";
   }, [page]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const policyParam = params.get("policy");
+    if (policyParam) {
+      setPage("legal");
+      setPolicyTab(policyParam);
+    }
+    const handlePop = () => {
+      const p = new URLSearchParams(window.location.search);
+      const pol = p.get("policy");
+      if (pol) {
+        setPage("legal");
+        setPolicyTab(pol);
+      }
+    };
+    window.addEventListener("popstate", handlePop);
+    return () => window.removeEventListener("popstate", handlePop);
+  }, []);
+
+  function handleOpenLegal(tab = "terms") {
+    setPolicyTab(tab);
+    setPage("legal");
+    const url = new URL(window.location);
+    url.searchParams.set("policy", tab);
+    window.history.pushState({}, "", url);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
   useEffect(() => {
     const alreadyAdmin = window.location.search.includes("admin");
@@ -1181,8 +1256,8 @@ export default function App() {
   }, [user]);
 
   useEffect(() => {
-    document.body.style.background = theme === "light" ? "#faf8f4" : "#050403";
-    document.body.style.color      = theme === "light" ? "#1a1208"  : "#e8dcc8";
+    document.body.style.background = theme === "light" ? "#EDE5D8" : "#050403";
+    document.body.style.color      = theme === "light" ? "#201812" : "#e8dcc8";
   }, [theme]);
 
   function toggleTheme() {
@@ -1221,6 +1296,7 @@ export default function App() {
         <Navbar
           page={page} setPage={setPage} theme={theme} toggleTheme={toggleTheme}
           user={user} onAuthOpen={() => setAuthModal("signin")} onSignOut={() => { supabase.auth.signOut().catch(() => {}); localStorage.clear(); sessionStorage.clear(); window.location.href = "/"; }}
+          onOpenLegal={handleOpenLegal}
         />
       </header>
       <main id="main-content">
@@ -1242,7 +1318,21 @@ export default function App() {
           />
         )}
         {page === "contact"  && <Contact/>}
+        {page === "legal"    && (
+          <LegalPoliciesPage
+            initialTab={policyTab}
+            onTabChange={(tab) => {
+              setPolicyTab(tab);
+              const url = new URL(window.location);
+              url.searchParams.set("policy", tab);
+              window.history.pushState({}, "", url);
+            }}
+            theme={theme}
+          />
+        )}
       </main>
+
+      <Footer setPage={setPage} onOpenLegal={handleOpenLegal} theme={theme} />
 
       {authModal && (
         <AuthModal mode={authModal} onClose={() => setAuthModal(null)} onSuccess={() => setAuthModal(null)} />

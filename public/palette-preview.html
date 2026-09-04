@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tiffany & Cris — Luxury Light Mode Palette Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400;1,600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: #12100e;
+      color: #e8dcc8;
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+
+    /* Top Control Bar */
+    .preview-header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(18, 16, 14, 0.96);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(197, 156, 85, 0.25);
+      padding: 16px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand-tag {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      letter-spacing: 0.08em;
+      color: #f0e4cc;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand-tag span {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 9px;
+      letter-spacing: 0.25em;
+      color: #c59c55;
+      text-transform: uppercase;
+      background: rgba(197, 156, 85, 0.12);
+      padding: 4px 10px;
+      border: 1px solid rgba(197, 156, 85, 0.3);
+      border-radius: 4px;
+    }
+    .palette-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .p-btn {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.04);
+      color: #a09080;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .p-btn:hover {
+      border-color: #c59c55;
+      color: #f0e4cc;
+      background: rgba(197, 156, 85, 0.1);
+    }
+    .p-btn.active {
+      border-color: #c59c55;
+      background: rgba(197, 156, 85, 0.22);
+      color: #f0e4cc;
+      box-shadow: 0 0 15px rgba(197, 156, 85, 0.25);
+    }
+    .swatch-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      border: 1px solid rgba(0, 0, 0, 0.25);
+    }
+
+    .view-toggle {
+      display: flex;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(197, 156, 85, 0.2);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .vt-btn {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 7px 14px;
+      border: none;
+      background: transparent;
+      color: #8a7a60;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .vt-btn.active {
+      background: #c59c55;
+      color: #12100e;
+      font-weight: 600;
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1380px;
+      margin: 32px auto;
+      padding: 0 24px;
+    }
+
+    /* Single Live Preview Hero Card */
+    .preview-stage {
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 30px 90px rgba(0,0,0,0.6);
+      transition: all 0.35s ease;
+      border: 1px solid rgba(197, 156, 85, 0.2);
+    }
+
+    /* Mockup Interior */
+    .mock-navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 22px 48px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.3s;
+    }
+    .mock-nav-links {
+      display: flex;
+      gap: 32px;
+    }
+    .mock-nav-link {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text);
+      transition: color 0.2s;
+    }
+    .mock-brand-center {
+      text-align: center;
+    }
+    .mock-brand-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      letter-spacing: 0.08em;
+      color: var(--heading);
+      font-weight: 400;
+    }
+    .mock-brand-sub {
+      font-size: 8px;
+      letter-spacing: 0.48em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .mock-hero {
+      padding: 90px 32px 100px;
+      text-align: center;
+      position: relative;
+      background-color: var(--bg);
+      background-image: radial-gradient(ellipse 70% 60% at 50% 45%, var(--glow) 0%, transparent 75%);
+      transition: background-color 0.3s;
+    }
+    .mock-hero-title-main {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(48px, 6vw, 76px);
+      font-weight: 400;
+      color: var(--heading);
+      line-height: 1.05;
+    }
+    .mock-hero-title-sub {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(48px, 6vw, 76px);
+      font-weight: 400;
+      font-style: italic;
+      color: var(--gold);
+      line-height: 1.05;
+      margin-bottom: 24px;
+    }
+    .mock-hero-desc {
+      font-size: 14px;
+      font-weight: 300;
+      color: var(--text);
+      max-width: 480px;
+      margin: 0 auto 36px;
+      line-height: 1.7;
+    }
+    .mock-btn-group {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin-bottom: 48px;
+    }
+    .mock-btn-primary {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      background: var(--gold);
+      color: #1a1208;
+      border: none;
+      padding: 16px 36px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    .mock-btn-secondary {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      background: var(--btn-sec-bg);
+      color: var(--heading);
+      border: 1px solid var(--gold);
+      padding: 16px 36px;
+      cursor: pointer;
+    }
+    .mock-divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      color: var(--muted);
+      font-size: 9px;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+    }
+    .mock-divider-line {
+      width: 50px;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* Heritage Section */
+    .mock-heritage {
+      padding: 64px 32px;
+      text-align: center;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      transition: background-color 0.3s;
+    }
+    .mock-heritage-eyebrow {
+      font-size: 10px;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 12px;
+    }
+    .mock-heritage-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 40px;
+      font-weight: 400;
+      color: var(--heading);
+      margin-bottom: 16px;
+    }
+    .mock-heritage-desc {
+      font-size: 13px;
+      color: var(--text);
+      max-width: 540px;
+      margin: 0 auto;
+      line-height: 1.8;
+    }
+
+    /* Palette Info Card Below Preview */
+    .palette-meta-box {
+      margin-top: 24px;
+      background: #181512;
+      border: 1px solid rgba(197, 156, 85, 0.25);
+      border-radius: 10px;
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 24px;
+    }
+    .pm-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 26px;
+      color: #f0e4cc;
+      margin-bottom: 6px;
+    }
+    .pm-subtitle {
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #c59c55;
+      margin-bottom: 12px;
+    }
+    .pm-desc {
+      font-size: 13px;
+      color: #a09080;
+      line-height: 1.6;
+    }
+    .swatches-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 12px;
+    }
+    .swatch-card {
+      background: #201c18;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 10px;
+      text-align: center;
+    }
+    .swatch-card-color {
+      height: 38px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      border: 1px solid rgba(0,0,0,0.15);
+    }
+    .swatch-card-name {
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #c59c55;
+      margin-bottom: 3px;
+    }
+    .swatch-card-hex {
+      font-size: 11px;
+      font-family: monospace;
+      color: #f0e4cc;
+    }
+
+    /* Grid Comparison View */
+    .grid-view {
+      display: none;
+      grid-template-columns: repeat(auto-fit, minmax(580px, 1fr));
+      gap: 32px;
+    }
+    .grid-card {
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(197, 156, 85, 0.2);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    }
+    .grid-card-banner {
+      background: #181512;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(197, 156, 85, 0.15);
+    }
+    .gc-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
+      color: #f0e4cc;
+    }
+    .gc-badge {
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #c59c55;
+      background: rgba(197, 156, 85, 0.15);
+      padding: 3px 8px;
+      border-radius: 3px;
+    }
+
+    @media (max-width: 768px) {
+      .grid-view { grid-template-columns: 1fr; }
+      .palette-meta-box { grid-template-columns: 1fr; }
+      .mock-navbar { padding: 16px 20px; }
+      .mock-nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Controller Bar -->
+  <header class="preview-header">
+    <div class="brand-tag">
+      Tiffany & Cris
+      <span>Palette Studio</span>
+    </div>
+
+    <div class="palette-nav">
+      <button class="p-btn active" onclick="selectPalette('p1', this)">
+        <span class="swatch-dot" style="background: #F2ECE4;"></span>
+        1. Warm Cashmere ⭐
+      </button>
+      <button class="p-btn" onclick="selectPalette('p2', this)">
+        <span class="swatch-dot" style="background: #ECE8E1;"></span>
+        2. Parisian Greige
+      </button>
+      <button class="p-btn" onclick="selectPalette('p3', this)">
+        <span class="swatch-dot" style="background: #EDE5D8;"></span>
+        3. Vintage Parchment
+      </button>
+      <button class="p-btn" onclick="selectPalette('p4', this)">
+        <span class="swatch-dot" style="background: #F5F2EB;"></span>
+        4. Soft Alabaster
+      </button>
+      <button class="p-btn" onclick="selectPalette('current', this)">
+        <span class="swatch-dot" style="background: #FAF8F4;"></span>
+        Current (Too Bright)
+      </button>
+    </div>
+
+    <div class="view-toggle">
+      <button class="vt-btn active" id="singleBtn" onclick="toggleView('single')">Full Stage</button>
+      <button class="vt-btn" id="gridBtn" onclick="toggleView('grid')">Side by Side</button>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- SINGLE STAGE VIEW -->
+    <div id="singleStageView">
+      <div id="activeStage" class="preview-stage">
+        <!-- Mockup Navbar -->
+        <nav class="mock-navbar">
+          <div class="mock-nav-links">
+            <span class="mock-nav-link" style="color: var(--gold); font-weight: 600;">Home</span>
+            <span class="mock-nav-link">Collection</span>
+          </div>
+          <div class="mock-brand-center">
+            <div class="mock-brand-title">Tiffany & Cris</div>
+            <div class="mock-brand-sub">Luxury Collections</div>
+          </div>
+          <div class="mock-nav-links">
+            <span class="mock-nav-link">Sign In</span>
+            <span class="mock-nav-link">Contact</span>
+            <span class="mock-nav-link" style="font-size: 13px;">☾</span>
+          </div>
+        </nav>
+
+        <!-- Mockup Hero -->
+        <section class="mock-hero">
+          <h1 class="mock-hero-title-main">Tiffany & Cris</h1>
+          <h2 class="mock-hero-title-sub">Luxury Collections</h2>
+          <p class="mock-hero-desc">
+            Hand-crafted bags forged in midnight and gold — for those who wear elegance like a second skin.
+          </p>
+
+          <div class="mock-btn-group">
+            <button class="mock-btn-primary">Explore Collection</button>
+            <button class="mock-btn-secondary">Private Viewing</button>
+          </div>
+
+          <div class="mock-divider">
+            <div class="mock-divider-line"></div>
+            <span>Exclusively Crafted</span>
+            <div class="mock-divider-line"></div>
+          </div>
+        </section>
+
+        <!-- Mockup Heritage Section -->
+        <section class="mock-heritage">
+          <div class="mock-heritage-eyebrow">Our Heritage</div>
+          <h3 class="mock-heritage-title">Where obsidian meets gold.</h3>
+          <p class="mock-heritage-desc">
+            Each Tiffany & Cris piece is carefully curated from the world's most renowned ateliers — ensuring every item reflects timeless luxury and craftsmanship.
+          </p>
+        </section>
+      </div>
+
+      <!-- Metadata Box for the Selected Palette -->
+      <div class="palette-meta-box" id="paletteMetaBox">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+
+    <!-- SIDE BY SIDE GRID VIEW -->
+    <div id="gridStageView" class="grid-view">
+      <!-- Grid items injected via JS -->
+    </div>
+
+  </main>
+
+  <script>
+    const PALETTES = {
+      p1: {
+        name: "Palette 1: Warm Cashmere & Burnished Bronze",
+        badge: "Recommended — Quiet Luxury",
+        insp: "Inspired by Brunello Cucinelli, Hermès, Loro Piana",
+        desc: "Deeply calming oat cashmere canvas that eliminates screen glare entirely. The burnished bronze gold has a 4.6:1 contrast ratio that stands out with genuine luxury weight.",
+        vars: {
+          "--bg": "#F2ECE4",
+          "--surface": "#E5DDD1",
+          "--heading": "#221B14",
+          "--text": "#615545",
+          "--muted": "#9E907E",
+          "--gold": "#A27938",
+          "--border": "rgba(162, 121, 56, 0.22)",
+          "--glow": "rgba(162, 121, 56, 0.12)",
+          "--btn-sec-bg": "rgba(162, 121, 56, 0.08)"
+        },
+        swatches: [
+          { role: "Canvas Base", hex: "#F2ECE4", name: "Warm Cashmere" },
+          { role: "Surface / Strip", hex: "#E5DDD1", name: "Muted Sandstone" },
+          { role: "Headings", hex: "#221B14", name: "Espresso Obsidian" },
+          { role: "Accent Gold", hex: "#A27938", name: "Burnished Bronze" },
+          { role: "Body Text", hex: "#615545", name: "Walnut Taupe" },
+          { role: "Meta / Lines", hex: "#9E907E", name: "Desert Sand" }
+        ]
+      },
+      p2: {
+        name: "Palette 2: Parisian Greige & Antique Brass",
+        badge: "Modern Minimalist",
+        insp: "Inspired by Celine, Saint Laurent, Chanel",
+        desc: "Neutral, architectural greige (grey-beige) tone. Balanced between warm and cool, giving a high-fashion runway look while eradicating blue-light glare.",
+        vars: {
+          "--bg": "#ECE8E1",
+          "--surface": "#DFD9CF",
+          "--heading": "#1B1917",
+          "--text": "#5C554D",
+          "--muted": "#948B80",
+          "--gold": "#9C7A40",
+          "--border": "rgba(156, 122, 64, 0.2)",
+          "--glow": "rgba(156, 122, 64, 0.12)",
+          "--btn-sec-bg": "rgba(156, 122, 64, 0.08)"
+        },
+        swatches: [
+          { role: "Canvas Base", hex: "#ECE8E1", name: "Atelier Greige" },
+          { role: "Surface / Strip", hex: "#DFD9CF", name: "Chalked Stone" },
+          { role: "Headings", hex: "#1B1917", name: "Noir Charcoal" },
+          { role: "Accent Gold", hex: "#9C7A40", name: "Antique Brass" },
+          { role: "Body Text", hex: "#5C554D", name: "Slate Mink" },
+          { role: "Meta / Lines", hex: "#948B80", name: "Muted Slate" }
+        ]
+      },
+      p3: {
+        name: "Palette 3: Vintage Parchment & Tuscan Cognac",
+        badge: "Artisanal Heritage",
+        insp: "Inspired by Bottega Veneta, The Row, Goyard",
+        desc: "Earthy, organic, and hand-finished. Recreates the aesthetic of vintage leather-bound notebooks and bespoke Florentine workshops.",
+        vars: {
+          "--bg": "#EDE5D8",
+          "--surface": "#DFD3C1",
+          "--heading": "#201812",
+          "--text": "#635140",
+          "--muted": "#9C8B77",
+          "--gold": "#9E6728",
+          "--border": "rgba(158, 103, 40, 0.22)",
+          "--glow": "rgba(158, 103, 40, 0.12)",
+          "--btn-sec-bg": "rgba(158, 103, 40, 0.08)"
+        },
+        swatches: [
+          { role: "Canvas Base", hex: "#EDE5D8", name: "Florentine Parchment" },
+          { role: "Surface / Strip", hex: "#DFD3C1", name: "Tuscan Travertine" },
+          { role: "Headings", hex: "#201812", name: "Roasted Cacao" },
+          { role: "Accent Gold", hex: "#9E6728", name: "Cognac Amber" },
+          { role: "Body Text", hex: "#635140", name: "Aged Umber" },
+          { role: "Meta / Lines", hex: "#9C8B77", name: "Warm Ochre" }
+        ]
+      },
+      p4: {
+        name: "Palette 4: Soft Alabaster & Gilded Ochre",
+        badge: "Subtle Adjustment (~15% Glare Reduction)",
+        insp: "Refined High-Key Luxury",
+        desc: "Keeps the airy, bright aesthetic of the current theme, but trims the peak paper glare by 15% and deepens the gold so it is crisp and legible.",
+        vars: {
+          "--bg": "#F5F2EB",
+          "--surface": "#E9E3D6",
+          "--heading": "#1C150E",
+          "--text": "#655745",
+          "--muted": "#9C8E7C",
+          "--gold": "#AB813B",
+          "--border": "rgba(171, 129, 59, 0.18)",
+          "--glow": "rgba(171, 129, 59, 0.1)",
+          "--btn-sec-bg": "rgba(171, 129, 59, 0.07)"
+        },
+        swatches: [
+          { role: "Canvas Base", hex: "#F5F2EB", name: "Soft Alabaster" },
+          { role: "Surface / Strip", hex: "#E9E3D6", name: "Champagne Bisque" },
+          { role: "Headings", hex: "#1C150E", name: "Midnight Espresso" },
+          { role: "Accent Gold", hex: "#AB813B", name: "Gilded Ochre" },
+          { role: "Body Text", hex: "#655745", name: "Warm Umber" },
+          { role: "Meta / Lines", hex: "#9C8E7C", name: "Champagne Stone" }
+        ]
+      },
+      current: {
+        name: "Current Theme (High-Key Bright)",
+        badge: "Current Setup",
+        insp: "The existing active style in codebase",
+        desc: "High glare (~95% luminance) with washed-out gold (2.8:1 contrast) and hardcoded dark-mode elements.",
+        vars: {
+          "--bg": "#FAF8F4",
+          "--surface": "#F0EBE0",
+          "--heading": "#1A1208",
+          "--text": "#6A5A40",
+          "--muted": "#DDD9D2",
+          "--gold": "#C59C55",
+          "--border": "rgba(197, 156, 85, 0.15)",
+          "--glow": "rgba(197, 156, 85, 0.1)",
+          "--btn-sec-bg": "rgba(0, 0, 0, 0.06)"
+        },
+        swatches: [
+          { role: "Canvas Base", hex: "#FAF8F4", name: "Stark Ivory" },
+          { role: "Surface / Strip", hex: "#F0EBE0", name: "Pale Cream" },
+          { role: "Headings", hex: "#1A1208", name: "Stark Obsidian" },
+          { role: "Accent Gold", hex: "#C59C55", name: "Pale Gold (Low Contrast)" },
+          { role: "Body Text", hex: "#6A5A40", name: "Raw Umber" },
+          { role: "Meta / Lines", hex: "#DDD9D2", name: "Faded Grey" }
+        ]
+      }
+    };
+
+    let activePaletteKey = 'p1';
+
+    function applyVars(element, vars) {
+      for (const [prop, val] of Object.entries(vars)) {
+        element.style.setProperty(prop, val);
+      }
+    }
+
+    function renderStage(key) {
+      const stage = document.getElementById('activeStage');
+      const meta = document.getElementById('paletteMetaBox');
+      const p = PALETTES[key];
+      applyVars(stage, p.vars);
+
+      meta.innerHTML = `
+        <div>
+          <div class="pm-title">${p.name}</div>
+          <div class="pm-subtitle">${p.badge} · ${p.insp}</div>
+          <p class="pm-desc">${p.desc}</p>
+        </div>
+        <div class="swatches-grid">
+          ${p.swatches.map(s => `
+            <div class="swatch-card">
+              <div class="swatch-card-color" style="background: ${s.hex};"></div>
+              <div class="swatch-card-name">${s.role}</div>
+              <div class="swatch-card-hex">${s.hex}</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function selectPalette(key, btn) {
+      activePaletteKey = key;
+      document.querySelectorAll('.p-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderStage(key);
+    }
+
+    function buildGrid() {
+      const grid = document.getElementById('gridStageView');
+      grid.innerHTML = '';
+      ['p1', 'p2', 'p3', 'p4', 'current'].forEach(key => {
+        const p = PALETTES[key];
+        const card = document.createElement('div');
+        card.className = 'grid-card';
+
+        const styleAttrs = Object.entries(p.vars).map(([k, v]) => `${k}:${v}`).join(';');
+
+        card.innerHTML = `
+          <div class="grid-card-banner">
+            <span class="gc-name">${p.name}</span>
+            <span class="gc-badge">${p.badge}</span>
+          </div>
+          <div style="${styleAttrs}">
+            <nav class="mock-navbar" style="padding: 16px 28px;">
+              <span class="mock-nav-link" style="color: var(--gold); font-weight: 600;">Home</span>
+              <div class="mock-brand-center">
+                <div class="mock-brand-title" style="font-size: 18px;">Tiffany & Cris</div>
+                <div class="mock-brand-sub" style="font-size: 7px;">Luxury Collections</div>
+              </div>
+              <span class="mock-nav-link">Contact</span>
+            </nav>
+            <section class="mock-hero" style="padding: 50px 24px 60px;">
+              <div class="mock-hero-title-main" style="font-size: 38px;">Tiffany & Cris</div>
+              <div class="mock-hero-title-sub" style="font-size: 38px; margin-bottom: 14px;">Luxury Collections</div>
+              <p class="mock-hero-desc" style="font-size: 12px; margin-bottom: 24px;">
+                Hand-crafted bags forged in midnight and gold — for those who wear elegance like a second skin.
+              </p>
+              <div class="mock-btn-group" style="margin-bottom: 30px; gap: 10px;">
+                <button class="mock-btn-primary" style="padding: 12px 24px; font-size: 9px;">Explore Collection</button>
+                <button class="mock-btn-secondary" style="padding: 12px 24px; font-size: 9px;">Private Viewing</button>
+              </div>
+              <div class="mock-divider">
+                <div class="mock-divider-line"></div>
+                <span>Exclusively Crafted</span>
+                <div class="mock-divider-line"></div>
+              </div>
+            </section>
+            <section class="mock-heritage" style="padding: 36px 20px;">
+              <div class="mock-heritage-eyebrow">Our Heritage</div>
+              <div class="mock-heritage-title" style="font-size: 26px;">Where obsidian meets gold.</div>
+            </section>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function toggleView(mode) {
+      const single = document.getElementById('singleStageView');
+      const grid = document.getElementById('gridStageView');
+      const singleBtn = document.getElementById('singleBtn');
+      const gridBtn = document.getElementById('gridBtn');
+
+      if (mode === 'single') {
+        single.style.display = 'block';
+        grid.style.display = 'none';
+        singleBtn.classList.add('active');
+        gridBtn.classList.remove('active');
+      } else {
+        single.style.display = 'none';
+        grid.style.display = 'grid';
+        buildGrid();
+        singleBtn.classList.remove('active');
+        gridBtn.classList.add('active');
+      }
+    }
+
+    // Initialize
+    renderStage('p1');
+  </script>
+</body>
+</html>
