@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { supabase } from "./supabase";
+import { supabase } from "../supabase";
 
 const CATS = ["Handbag", "Shoulder Bag", "Tote Bag", "Crossbody"];
 const SPEC_KEYS = ["Material", "Lining", "Hardware", "Size", "Origin"];
