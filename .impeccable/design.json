@@ -1,0 +1,212 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-27T14:22:11.007Z",
+  "title": "Design System: Tiffany & Cris",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Champagne Gold",
+        "canonical": "#c59c55",
+        "tonalRamp": [
+          "#2d210b",
+          "#4e3b16",
+          "#735722",
+          "#9a7631",
+          "#c59c55",
+          "#d6b274",
+          "#e5cb9c",
+          "#f4e7cd"
+        ]
+      },
+      "primary-hover": {
+        "role": "primary",
+        "displayName": "Luminous Warm Gold",
+        "canonical": "#d4aa65",
+        "tonalRamp": [
+          "#33240b",
+          "#573d15",
+          "#7e5921",
+          "#a67830",
+          "#d4aa65",
+          "#dec086",
+          "#ebd6ad",
+          "#f6ebd4"
+        ]
+      },
+      "neutral-bg": {
+        "role": "neutral",
+        "displayName": "Obsidian Noir",
+        "canonical": "#050403",
+        "tonalRamp": [
+          "#020101",
+          "#050403",
+          "#0f0c08",
+          "#1c1710",
+          "#2b2319",
+          "#3b3023",
+          "#4c3f2f",
+          "#5e4e3b"
+        ]
+      },
+      "neutral-surface": {
+        "role": "neutral",
+        "displayName": "Dark Amber Charcoal",
+        "canonical": "#0a0804",
+        "tonalRamp": [
+          "#050402",
+          "#0a0804",
+          "#171209",
+          "#261e10",
+          "#372b19",
+          "#493a23",
+          "#5c4a2e",
+          "#705b3b"
+        ]
+      },
+      "text-primary": {
+        "role": "neutral",
+        "displayName": "Warm Pearl Ivory",
+        "canonical": "#f0e4cc",
+        "tonalRamp": [
+          "#4a3f2d",
+          "#6f5f45",
+          "#968160",
+          "#bfa881",
+          "#e0cdab",
+          "#f0e4cc",
+          "#f7f1e4",
+          "#fbf9f3"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Editorial Display",
+        "purpose": "Hero and major editorial statements in Cormorant Garamond."
+      },
+      "headline": {
+        "displayName": "Collection Headline",
+        "purpose": "Section introductions and collection headers."
+      },
+      "body": {
+        "displayName": "Editorial Body",
+        "purpose": "Product descriptions and storytelling in Montserrat."
+      },
+      "label": {
+        "displayName": "Tracked Label",
+        "purpose": "Buttons, metadata, categories, and navigation."
+      }
+    },
+    "shadows": [
+      {
+        "name": "ambient-glow",
+        "value": "radial-gradient(ellipse, rgba(197,156,85,0.07) 0%, transparent 70%)",
+        "purpose": "Atmospheric luxury focal lighting."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-luxury",
+        "value": "cubic-bezier(0.25, 0.46, 0.45, 0.94)",
+        "purpose": "Heavyweight, silky smooth hover zoom and modal transitions."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "480px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1100px"
+      },
+      {
+        "name": "xl",
+        "value": "1280px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Solid Champagne Gold action button for primary luxury CTA and appointment booking.",
+      "html": "<button class=\"ds-btn-primary\">EXPLORE COLLECTION</button>",
+      "css": ".ds-btn-primary { background: #c59c55; color: #0a0704; border: none; padding: 16px 36px; font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; cursor: pointer; border-radius: 0; transition: background 0.25s, transform 0.15s; } .ds-btn-primary:hover { background: #d4aa65; transform: translateY(-1px); }"
+    },
+    {
+      "name": "Secondary Ghost Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Hairline framed luxury secondary button.",
+      "html": "<button class=\"ds-btn-secondary\">BOOK PRIVATE VIEWING</button>",
+      "css": ".ds-btn-secondary { background: rgba(10,8,4,0.7); color: #c59c55; border: 1px solid #c59c55; padding: 16px 36px; font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; cursor: pointer; border-radius: 0; transition: background 0.25s, transform 0.15s; } .ds-btn-secondary:hover { background: rgba(197,156,85,0.1); transform: translateY(-1px); }"
+    },
+    {
+      "name": "Filter Tab",
+      "kind": "chip",
+      "refersTo": "filter-tab",
+      "description": "Minimalist category filter tab with gold active border indicator.",
+      "html": "<button class=\"ds-filter-tab active\">HANDBAGS</button>",
+      "css": ".ds-filter-tab { background: transparent; border: none; border-bottom: 2px solid transparent; color: #4a3e28; padding: 18px 20px; font-family: 'Montserrat', sans-serif; font-size: 9.5px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; cursor: pointer; transition: color 0.2s, border-color 0.2s; } .ds-filter-tab:hover, .ds-filter-tab.active { color: #c59c55; border-bottom-color: #c59c55; }"
+    },
+    {
+      "name": "Product Card",
+      "kind": "card",
+      "refersTo": "product-card",
+      "description": "4:5 aspect ratio luxury product showcase stage with smooth hover zoom.",
+      "html": "<div class=\"ds-product-card\"><div class=\"ds-pc-img\"><div class=\"ds-pc-stage\"></div></div><div class=\"ds-pc-info\"><div class=\"ds-pc-cat\">LOUIS VUITTON</div><div class=\"ds-pc-name\">Twist PM Epi Leather</div></div></div>",
+      "css": ".ds-product-card { background: transparent; cursor: pointer; position: relative; font-family: 'Montserrat', sans-serif; } .ds-pc-img { aspect-ratio: 4/5; background: #0d0a05; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; } .ds-pc-stage { width: 100%; height: 100%; transition: transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94); background: radial-gradient(ellipse at center, rgba(197,156,85,0.1) 0%, #0d0a05 80%); } .ds-product-card:hover .ds-pc-stage { transform: scale(1.04); } .ds-pc-info { padding: 14px 2px 0; } .ds-pc-cat { font-size: 7.5px; font-weight: 500; letter-spacing: 0.32em; text-transform: uppercase; color: #6a5a38; margin-bottom: 5px; } .ds-pc-name { font-family: 'Cormorant Garamond', serif; font-size: 15px; font-weight: 400; color: #d4c4a0; transition: color 0.25s; } .ds-product-card:hover .ds-pc-name { color: #c59c55; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Obsidian Atelier",
+    "overview": "The visual language of Tiffany & Cris is grounded in high-end Parisian atelier aesthetics and intimate private showroom consultation. The palette emerges from deep obsidian blacks (#050403) layered with warm luminous golds (#c59c55) and champagne ivories (#f0e4cc), creating an evocative, museum-grade dark atmosphere that frames each handcrafted leather bag as a singular work of art.",
+    "keyCharacteristics": [
+      "Atelier Obsidian Atmosphere: Atmospheric radial warm glows and fine grain textures on deep black canvas.",
+      "Editorial Contrast: High-drama scale variance between oversized editorial display headlines and micro-tracked labels.",
+      "Razor Sharp Geometry: Architectural zero-radius contours on cards and buttons evoking luxury packaging and bespoke leather gift boxes.",
+      "Tactile Transitions: Subdued, silky image zoom and micro-hover states that feel organic and heavyweight."
+    ],
+    "rules": [
+      {
+        "name": "The Rarity Rule",
+        "body": "Champagne Gold (#c59c55) is reserved for high-intent actions, active navigation, and key accents. It must never coat large surface fills or overwhelm content.",
+        "section": "colors"
+      },
+      {
+        "name": "The No-Hard-White Rule",
+        "body": "True #ffffff is never used. All highlights and text rely on warm pearl and champagne tones (#f0e4cc, #e8dcc8) to preserve analog warmth.",
+        "section": "colors"
+      },
+      {
+        "name": "The Editorial Pairing Rule",
+        "body": "Headlines above 24px must use Cormorant Garamond. All navigation, metadata, specifications, and UI controls must use Montserrat in uppercase tracking.",
+        "section": "typography"
+      },
+      {
+        "name": "The Ghost Border Rule",
+        "body": "Boundaries between surfaces are created via 1px low-opacity gold hairlines and subtle tonal shifts, never heavy solid borders or dark drop-shadows.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do maintain generous whitespace and deliberate padding around luxury bag photography.",
+      "Do format all metadata, categories, and buttons in uppercase with wide letter-spacing (≥ 0.22em).",
+      "Do use Cormorant Garamond italics selectively for evocative emphasis words (e.g. Collection, Private).",
+      "Do ensure all image stages maintain a consistent 4:5 aspect ratio."
+    ],
+    "donts": [
+      "Don't use generic rounded corners (e.g. 8px, 16px) on product cards, inputs, or buttons; preserve the bespoke rectilinear silhouette.",
+      "Don't introduce high-saturation neon colors, cold blues, or synthetic purples.",
+      "Don't crowd the screen with automated checkout banners, countdown timers, or aggressive discount badges.",
+      "Don't use pure stark white (#ffffff) for typography; always use pearl/champagne tones."
+    ]
+  }
+}
