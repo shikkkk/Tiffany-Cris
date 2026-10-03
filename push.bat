@@ -1,5 +1,8 @@
 @echo off
-set "PATH=C:\Users\Pudgie\AppData\Local\Programs\Git\cmd;C:\Users\Pudgie\AppData\Local\Programs\Git\mingw64\bin;%PATH%"
+setlocal
+if exist "C:\Program Files\Git\cmd" set "PATH=C:\Program Files\Git\cmd;C:\Program Files\Git\mingw64\bin;%PATH%"
+if exist "%LOCALAPPDATA%\Programs\Git\cmd" set "PATH=%LOCALAPPDATA%\Programs\Git\cmd;%LOCALAPPDATA%\Programs\Git\mingw64\bin;%PATH%"
+
 echo [1] Checking Git location...
 where git
 echo [2] Checking Git version...
@@ -8,5 +11,5 @@ echo [3] Checking branch status...
 git status
 echo [4] Pushing to origin master...
 git push -v origin master
-echo [6] Done.
+echo [5] Done.
 pause
