@@ -379,7 +379,7 @@ function LoginScreen({ onExit }) {
 }
 
 /* ─── SIDEBAR ────────────────────────────────────────────────────────── */
-function Sidebar({ tab, setTab, onSignOut, onExit, open, onClose, unreadMsgCount }) {
+function Sidebar({ tab, setTab, onSignOut, open, onClose, unreadMsgCount }) {
   const navItems = [
     { key: "overview",     label: "Overview",     icon: Ico.home },
     { key: "collections",  label: "Collections",  icon: Ico.grid },
@@ -408,7 +408,18 @@ function Sidebar({ tab, setTab, onSignOut, onExit, open, onClose, unreadMsgCount
         ))}
       </nav>
       <div className="adm-sb-footer">
-        <button className="adm-sb-item" onClick={onExit}>{Ico.eye} View Site</button>
+        <a
+          href="/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="adm-sb-item"
+          style={{ textDecoration: "none" }}
+          title="Open customer storefront in a new tab"
+        >
+          {Ico.eye}
+          <span style={{ flex: 1 }}>View Site</span>
+          <span style={{ fontSize: "11px", opacity: 0.65 }}>↗</span>
+        </a>
         <button className="adm-sb-item" onClick={onSignOut}>{Ico.logout} Sign Out</button>
       </div>
     </aside>
@@ -1522,7 +1533,7 @@ export default function AdminPage({ onExit }) {
         <div className={`adm-sb-mask${sidebarOpen ? " open" : ""}`} onClick={() => setSidebarOpen(false)} />
         <Sidebar tab={tab} setTab={setTab} open={sidebarOpen} onClose={() => setSidebarOpen(false)}
           unreadMsgCount={unreadMsgCount}
-          onSignOut={async () => { await supabase.auth.signOut(); window.location.href = "/"; }} onExit={onExit} />
+          onSignOut={async () => { await supabase.auth.signOut(); window.location.href = "/"; }} />
         <div className="adm-main">
           <div className="adm-topbar">
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
@@ -1530,6 +1541,16 @@ export default function AdminPage({ onExit }) {
               <div className="adm-topbar-title">{titles[tab]}</div>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <a
+                href="/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="adm-btn adm-btn-white adm-btn-sm"
+                style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "6px" }}
+                title="Open customer storefront in a new tab"
+              >
+                {Ico.eye} View Site ↗
+              </a>
               <button
                 className="adm-btn adm-btn-white adm-btn-sm"
                 onClick={toggleAdminTheme}

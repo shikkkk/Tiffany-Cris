@@ -440,11 +440,81 @@ const globalStyles = `
   .pc-wish-btn.on { opacity: 1; color: #c59c55; border-color: rgba(197,156,85,0.5); }
   .pc-wish-btn:hover { background: rgba(197,156,85,0.15); color: #c59c55; border-color: #c59c55; }
 
-  /* ── LEGAL & POLICY RESPONSIVE ── */
-  @media (max-width: 860px) {
-    .policy-grid { grid-template-columns: 1fr !important; gap: 24px !important; }
-    .policy-sidebar { display: none !important; }
-    .ct-footer-grid { grid-template-columns: 1fr !important; gap: 36px !important; }
+  /* ── ADMIN NAVIGATION & FLOATING RETURN PILL ── */
+  .tc-nav-admin-link {
+    color: #c59c55 !important;
+    border: 1px solid rgba(197, 156, 85, 0.45);
+    padding: 6px 12px;
+    border-radius: 2px;
+    font-weight: 600 !important;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(197, 156, 85, 0.08);
+    transition: all 0.25s ease;
+  }
+  .tc-nav-admin-link:hover {
+    background: rgba(197, 156, 85, 0.22);
+    border-color: #c59c55;
+    box-shadow: 0 0 12px rgba(197, 156, 85, 0.35);
+    color: #ffffff !important;
+  }
+  [data-theme="light"] .tc-nav-admin-link {
+    color: #8c5a20 !important;
+    border-color: rgba(140, 90, 32, 0.45);
+    background: rgba(140, 90, 32, 0.08);
+  }
+  [data-theme="light"] .tc-nav-admin-link:hover {
+    background: rgba(140, 90, 32, 0.18);
+    color: #3b2813 !important;
+  }
+  .tc-admin-floating-pill {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(10, 8, 5, 0.94);
+    border: 1px solid #c59c55;
+    padding: 10px 18px;
+    border-radius: 9999px;
+    color: #f5eedf;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    text-decoration: none;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7), 0 0 16px rgba(197, 156, 85, 0.25);
+    backdrop-filter: blur(12px);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  }
+  .tc-admin-floating-pill:hover {
+    transform: translateY(-2px);
+    background: rgba(20, 16, 10, 0.98);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.85), 0 0 24px rgba(197, 156, 85, 0.5);
+    color: #ffffff;
+  }
+  .tc-admin-floating-icon {
+    color: #c59c55;
+    font-size: 13px;
+    line-height: 1;
+  }
+  [data-theme="light"] .tc-admin-floating-pill {
+    background: rgba(245, 238, 227, 0.95);
+    border-color: #9E6728;
+    color: #201812;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15), 0 0 12px rgba(158, 103, 40, 0.2);
+  }
+  [data-theme="light"] .tc-admin-floating-pill:hover {
+    background: #ffffff;
+    color: #000000;
+  }
+  [data-theme="light"] .tc-admin-floating-icon {
+    color: #9E6728;
   }
 `;
 
@@ -721,7 +791,7 @@ function ViewingRequestModal({ item, user, onClose }) {
 }
 
 
-function Navbar({ page, setPage, theme, toggleTheme, user, onAuthOpen, onSignOut, onOpenLegal }) {
+function Navbar({ page, setPage, theme, toggleTheme, user, userIsAdmin, onAuthOpen, onSignOut, onOpenLegal }) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   useEffect(() => {
@@ -741,6 +811,15 @@ function Navbar({ page, setPage, theme, toggleTheme, user, onAuthOpen, onSignOut
           <img src={siteLogo} alt="Tiffany & Cris" className="tc-logo" />
         </div>
         <div className="tc-nav-links">
+          {userIsAdmin && (
+            <a
+              href="/?admin"
+              className="tc-nav-link tc-nav-admin-link"
+              title="Return to Admin Atelier Dashboard"
+            >
+              ✦ Admin Atelier
+            </a>
+          )}
           {user ? (
             <>
               <button className={`tc-nav-link${page === "wishlist" ? " active" : ""}`} onClick={() => go("wishlist")}>Wishlist</button>
@@ -765,6 +844,15 @@ function Navbar({ page, setPage, theme, toggleTheme, user, onAuthOpen, onSignOut
         <div className="tc-mobile-menu" onClick={() => setMenuOpen(false)}>
           <button className="tc-mobile-link" onClick={() => go("home")}>Home</button>
           <button className="tc-mobile-link" onClick={() => go("collection")}>Collection</button>
+          {userIsAdmin && (
+            <a
+              href="/?admin"
+              className="tc-mobile-link"
+              style={{ color: "#c59c55", fontWeight: 600, border: "1px solid rgba(197,156,85,0.3)", padding: "10px", margin: "6px 0", textAlign: "center", textDecoration: "none" }}
+            >
+              ✦ Return to Admin Atelier →
+            </a>
+          )}
           {user ? (
             <>
               <button className="tc-mobile-link" onClick={() => go("wishlist")}>Wishlist</button>
@@ -793,6 +881,7 @@ export default function SiteRouter() {
   const [wishlistIds, setWishlistIds] = useState(new Set());
   const [authModal, setAuthModal] = useState(null);
   const [viewingRequestItem, setViewingRequestItem] = useState(null);
+  const [userIsAdmin, setUserIsAdmin] = useState(false);
   const isAdmin = window.location.search.includes("admin");
 
   useEffect(() => {
@@ -840,17 +929,25 @@ export default function SiteRouter() {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       const u = session?.user ?? null;
       setUser(u);
-      if (u && !alreadyAdmin) {
+      if (u) {
         const { data } = await supabase.from("Users").select("is_admin").eq("email", u.email).limit(1).maybeSingle();
-        if (data?.is_admin) { window.location.href = "/?admin"; }
+        if (data?.is_admin) {
+          setUserIsAdmin(true);
+        }
       }
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       const u = session?.user ?? null;
       setUser(u);
-      if (event === "SIGNED_IN" && u && !alreadyAdmin) {
+      if (u) {
         const { data } = await supabase.from("Users").select("is_admin").eq("email", u.email).limit(1).maybeSingle();
-        if (data?.is_admin) { window.location.href = "/?admin"; }
+        const isAdminUser = Boolean(data?.is_admin);
+        setUserIsAdmin(isAdminUser);
+        if (event === "SIGNED_IN" && isAdminUser && !alreadyAdmin) {
+          window.location.href = "/?admin";
+        }
+      } else {
+        setUserIsAdmin(false);
       }
     });
     return () => subscription.unsubscribe();
@@ -914,7 +1011,7 @@ export default function SiteRouter() {
       <header>
         <Navbar
           page={page} setPage={setPage} theme={theme} toggleTheme={toggleTheme}
-          user={user} onAuthOpen={() => setAuthModal("signin")} onSignOut={() => { supabase.auth.signOut().catch(() => {}); localStorage.clear(); sessionStorage.clear(); window.location.href = "/"; }}
+          user={user} userIsAdmin={userIsAdmin} onAuthOpen={() => setAuthModal("signin")} onSignOut={() => { supabase.auth.signOut().catch(() => {}); localStorage.clear(); sessionStorage.clear(); window.location.href = "/"; }}
           onOpenLegal={handleOpenLegal}
         />
       </header>
@@ -969,6 +1066,17 @@ export default function SiteRouter() {
 
       {authModal && (
         <AuthModal mode={authModal} onClose={() => setAuthModal(null)} onSuccess={() => setAuthModal(null)} />
+      )}
+
+      {userIsAdmin && (
+        <a
+          href="/?admin"
+          className="tc-admin-floating-pill"
+          title="Return to Admin Atelier Dashboard"
+        >
+          <span className="tc-admin-floating-icon">✦</span>
+          <span>Admin Atelier</span>
+        </a>
       )}
     </div>
   );
