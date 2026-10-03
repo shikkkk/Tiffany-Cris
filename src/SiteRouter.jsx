@@ -925,20 +925,14 @@ export default function SiteRouter() {
   }
 
   useEffect(() => {
-    const alreadyAdmin = window.location.search.includes("admin");
-
-    async function checkAdmin(u, event) {
+    async function checkAdmin(u) {
       if (!u) {
         setUserIsAdmin(false);
         return;
       }
       try {
         const { data } = await supabase.from("Users").select("is_admin").eq("email", u.email).limit(1).maybeSingle();
-        const isAdminUser = Boolean(data?.is_admin);
-        setUserIsAdmin(isAdminUser);
-        if (event === "SIGNED_IN" && isAdminUser && !alreadyAdmin) {
-          window.location.href = "/?admin";
-        }
+        setUserIsAdmin(Boolean(data?.is_admin));
       } catch (err) {
         console.error("Error checking admin status:", err);
         setUserIsAdmin(false);
@@ -951,11 +945,11 @@ export default function SiteRouter() {
       if (u) checkAdmin(u);
     }).catch(() => {});
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       const u = session?.user ?? null;
       setUser(u);
       setTimeout(() => {
-        checkAdmin(u, event);
+        checkAdmin(u);
       }, 0);
     });
 
