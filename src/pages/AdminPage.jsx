@@ -1408,10 +1408,10 @@ function MessagesPanel({ onUnreadChange }) {
 }
 
 /* ─── ROOT ───────────────────────────────────────────────────────────── */
-export default function AdminPage({ onExit }) {
-  const [user, setUser] = useState(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [authLoading, setAuthLoading] = useState(true);
+export default function AdminPage({ onExit, initialUser = null, initialIsAdmin = false }) {
+  const [user, setUser] = useState(initialUser);
+  const [isAdmin, setIsAdmin] = useState(initialIsAdmin);
+  const [authLoading, setAuthLoading] = useState(!initialUser);
   const [tab, setTab] = useState("overview");
   const [colCount, setColCount] = useState(0);
   const [userCount, setUserCount] = useState(0);
@@ -1431,34 +1431,56 @@ export default function AdminPage({ onExit }) {
   }
 
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      if (currentUser) {
+    let active = true;
+    const safetyTimer = setTimeout(() => {
+      if (active) setAuthLoading(false);
+    }, 2500);
+
+    async function checkUser(u) {
+      if (!u) {
+        if (active) {
+          setUser(null);
+          setIsAdmin(false);
+          setAuthLoading(false);
+        }
+        return;
+      }
+      try {
         const { data } = await supabase
           .from("Users")
           .select("is_admin")
-          .eq("email", currentUser.email)
+          .eq("email", u.email)
           .maybeSingle();
-        setIsAdmin(data?.is_admin === true);
+        if (active) {
+          setUser(u);
+          setIsAdmin(data?.is_admin === true);
+        }
+      } catch (err) {
+        console.error("Error fetching admin status:", err);
+      } finally {
+        if (active) setAuthLoading(false);
       }
-      setAuthLoading(false);
+    }
+
+    supabase.auth.getSession().then(({ data: { session } = {} }) => {
+      checkUser(session?.user ?? null);
+    }).catch(() => {
+      if (active) setAuthLoading(false);
     });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_e, session) => {
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
       const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      if (currentUser) {
-        const { data } = await supabase
-          .from("Users")
-          .select("is_admin")
-          .eq("email", currentUser.email)
-          .maybeSingle();
-        setIsAdmin(data?.is_admin === true);
-      } else {
-        setIsAdmin(false);
-      }
+      if (active) setUser(currentUser);
+      setTimeout(() => {
+        checkUser(currentUser);
+      }, 0);
     });
-    return () => subscription.unsubscribe();
+
+    return () => {
+      active = false;
+      clearTimeout(safetyTimer);
+      subscription.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {

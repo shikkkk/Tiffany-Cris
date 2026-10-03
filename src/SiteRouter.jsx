@@ -926,30 +926,39 @@ export default function SiteRouter() {
 
   useEffect(() => {
     const alreadyAdmin = window.location.search.includes("admin");
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      const u = session?.user ?? null;
-      setUser(u);
-      if (u) {
-        const { data } = await supabase.from("Users").select("is_admin").eq("email", u.email).limit(1).maybeSingle();
-        if (data?.is_admin) {
-          setUserIsAdmin(true);
-        }
+
+    async function checkAdmin(u, event) {
+      if (!u) {
+        setUserIsAdmin(false);
+        return;
       }
-    });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      const u = session?.user ?? null;
-      setUser(u);
-      if (u) {
+      try {
         const { data } = await supabase.from("Users").select("is_admin").eq("email", u.email).limit(1).maybeSingle();
         const isAdminUser = Boolean(data?.is_admin);
         setUserIsAdmin(isAdminUser);
         if (event === "SIGNED_IN" && isAdminUser && !alreadyAdmin) {
           window.location.href = "/?admin";
         }
-      } else {
+      } catch (err) {
+        console.error("Error checking admin status:", err);
         setUserIsAdmin(false);
       }
+    }
+
+    supabase.auth.getSession().then(({ data: { session } = {} }) => {
+      const u = session?.user ?? null;
+      setUser(u);
+      if (u) checkAdmin(u);
+    }).catch(() => {});
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      const u = session?.user ?? null;
+      setUser(u);
+      setTimeout(() => {
+        checkAdmin(u, event);
+      }, 0);
     });
+
     return () => subscription.unsubscribe();
   }, []);
 
@@ -1000,7 +1009,7 @@ export default function SiteRouter() {
           Loading Admin Atelier...
         </div>
       }>
-        <AdminPage onExit={() => window.location.href = "/"} />
+        <AdminPage onExit={() => window.location.href = "/"} initialUser={user} initialIsAdmin={userIsAdmin} />
       </Suspense>
     );
   }
