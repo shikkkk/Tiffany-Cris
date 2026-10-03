@@ -576,18 +576,26 @@ function AuthModal({ mode, onClose, onSuccess }) {
     if (tab === "signup") {
       if (password !== confirm) { setErr("Passwords don't match."); setLoading(false); return; }
       const { error } = await supabase.auth.signUp({ email, password });
-      if (error) setErr(error.message);
-      else {
+      if (error) {
+        setErr(error.message);
+      } else {
         const { data: existing } = await supabase.from("Users").select("id").eq("email", email).maybeSingle();
         if (!existing) {
           await supabase.from("Users").insert([{ email, is_admin: false, created_at: new Date().toISOString() }]);
         }
-        setOk("Account created! You can now sign in."); switchTab("signin"); setPassword(""); setConfirm("");
+        // Stay on signup tab — show confirmation email notice, don't imply they can sign in immediately
+        setOk("✓ Account created! Check your email inbox and click the confirmation link before signing in.");
+        setPassword(""); setConfirm("");
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) setErr(error.message);
-      else {
+      if (error) {
+        if (error.message === "Email not confirmed") {
+          setErr("Your email hasn't been confirmed yet. Check your inbox for a confirmation link.");
+        } else {
+          setErr(error.message);
+        }
+      } else {
         const { data: existing } = await supabase.from("Users").select("id").eq("email", email).maybeSingle();
         if (!existing) {
           await supabase.from("Users").insert([{ email, is_admin: false, created_at: new Date().toISOString() }]);
