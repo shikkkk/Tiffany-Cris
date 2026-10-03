@@ -1284,8 +1284,15 @@ export default function SiteRouter() {
     }
   }
 
-  function handleViewingRequest() {
+  async function handleViewingRequest(collectionName) {
     if (!user) { setAuthModal("signin"); return; }
+    await supabase.from("viewing_requests").insert([{
+      user_email: user.email,
+      collection_name: collectionName || "General Viewing",
+      message: "",
+      status: "pending",
+      created_at: new Date().toISOString(),
+    }]);
     window.open("https://www.facebook.com/tiffanyandcris", "_blank");
   }
 

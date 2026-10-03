@@ -311,17 +311,22 @@ function LoginScreen({ onExit }) {
       const { error } = await supabase.auth.signUp({ email, password });
       if (error) setErr(error.message);
       else {
+        // Do NOT grant is_admin here — admin access must be assigned manually in the database
         const { data: existing } = await supabase.from("Users").select("id").eq("email", email).maybeSingle();
-        if (existing) {
-          await supabase.from("Users").update({ is_admin: true }).eq("email", email);
-        } else {
-          await supabase.from("Users").insert([{ email, is_admin: true, created_at: new Date().toISOString() }]);
+        if (!existing) {
+          await supabase.from("Users").insert([{ email, is_admin: false, created_at: new Date().toISOString() }]);
         }
-        setSuccess("Account created! You can now sign in.");
+        setSuccess("Account created! Check your email to confirm your address, then sign in.");
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) setErr(error.message);
+      if (error) {
+        if (error.message === "Email not confirmed") {
+          setErr("Please confirm your email address before signing in.");
+        } else {
+          setErr(error.message);
+        }
+      }
     }
     setLoading(false);
   }
@@ -986,6 +991,7 @@ function RequestsPanel({ onCountChange }) {
 /* ─── ROOT ───────────────────────────────────────────────────────────── */
 export default function AdminPage({ onExit }) {
   const [user, setUser] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
   const [tab, setTab] = useState("overview");
   const [colCount, setColCount] = useState(0);
@@ -1004,23 +1010,43 @@ export default function AdminPage({ onExit }) {
   }
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      if (currentUser) {
+        const { data } = await supabase
+          .from("Users")
+          .select("is_admin")
+          .eq("email", currentUser.email)
+          .maybeSingle();
+        setIsAdmin(data?.is_admin === true);
+      }
       setAuthLoading(false);
     });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
-      setUser(session?.user ?? null);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_e, session) => {
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      if (currentUser) {
+        const { data } = await supabase
+          .from("Users")
+          .select("is_admin")
+          .eq("email", currentUser.email)
+          .maybeSingle();
+        setIsAdmin(data?.is_admin === true);
+      } else {
+        setIsAdmin(false);
+      }
     });
     return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !isAdmin) return;
     supabase.from("collections").select("*").order("created_at", { ascending: false })
       .then(({ data }) => { setColCount(data?.length || 0); setRecentCols(data || []); });
     supabase.from("Users").select("id")
       .then(({ data }) => setUserCount(data?.length || 0));
-  }, [user]);
+  }, [user, isAdmin]);
 
   const titles = { overview: "Overview", collections: "Collections", users: "Users", requests: "Viewing Requests" };
 
@@ -1040,6 +1066,27 @@ export default function AdminPage({ onExit }) {
         <style>{S}</style>
         <div className={"adm" + darkClass}>
           <LoginScreen onExit={onExit} />
+        </div>
+      </>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <>
+        <style>{S}</style>
+        <div className={"adm" + darkClass} style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: "16px" }}>
+          <div style={{ fontFamily: "Inter, sans-serif", textAlign: "center" }}>
+            <div style={{ fontSize: "32px", marginBottom: "12px" }}>🚫</div>
+            <div style={{ fontSize: "18px", fontWeight: 600, color: "#1e293b", marginBottom: "8px" }}>Access Denied</div>
+            <div style={{ fontSize: "13px", color: "#64748b", marginBottom: "24px" }}>
+              Your account does not have admin privileges.
+            </div>
+            <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+              <button className="adm-btn adm-btn-white adm-btn-sm" onClick={async () => { await supabase.auth.signOut(); }}>Sign Out</button>
+              <button className="adm-btn adm-btn-gold adm-btn-sm" onClick={onExit}>← Back to Site</button>
+            </div>
+          </div>
         </div>
       </>
     );

@@ -7,11 +7,27 @@ export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const [error, setError] = useState("");
+
   const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => { setLoading(false); setSubmitted(true); }, 1400);
+    setError("");
+    const { error: dbErr } = await supabase.from("messages").insert([{
+      name: form.name,
+      email: form.email,
+      phone: form.phone || null,
+      subject: form.subject,
+      message: form.message,
+      created_at: new Date().toISOString(),
+    }]);
+    setLoading(false);
+    if (dbErr) {
+      setError("Something went wrong. Please try again or contact us directly.");
+    } else {
+      setSubmitted(true);
+    }
   };
 
   return (
@@ -65,6 +81,7 @@ export default function ContactPage() {
               <button className="ct-submit" disabled={loading}>
                 {loading ? "Sending..." : "Send Message"}
               </button>
+              {error && <div style={{ marginTop: "12px", fontSize: "13px", color: "#dc2626" }}>{error}</div>}
             </form>
           ) : (
             <div className="ct-success show">
