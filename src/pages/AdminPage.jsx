@@ -408,18 +408,6 @@ function Sidebar({ tab, setTab, onSignOut, open, onClose, unreadMsgCount }) {
         ))}
       </nav>
       <div className="adm-sb-footer">
-        <a
-          href="/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="adm-sb-item"
-          style={{ textDecoration: "none" }}
-          title="Open customer storefront in a new tab"
-        >
-          {Ico.eye}
-          <span style={{ flex: 1 }}>View Site</span>
-          <span style={{ fontSize: "11px", opacity: 0.65 }}>↗</span>
-        </a>
         <button className="adm-sb-item" onClick={onSignOut}>{Ico.logout} Sign Out</button>
       </div>
     </aside>
