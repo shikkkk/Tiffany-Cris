@@ -919,7 +919,7 @@ export default function SiteRouter() {
         />
       </header>
       <main id="main-content">
-        {page === "home"     && <HomePage setPage={setPage} theme={theme}/>}
+        {page === "home"     && <HomePage setPage={setPage} theme={theme} onViewingRequest={handleViewingRequest}/>}
         {page === "collection" && (
           <CollectionPage
             user={user} wishlistIds={wishlistIds}
@@ -936,7 +936,7 @@ export default function SiteRouter() {
             onAuthRequired={() => setAuthModal("signin")}
           />
         )}
-        {page === "contact"  && <ContactPage/>}
+        {page === "contact"  && <ContactPage onViewingRequest={handleViewingRequest}/>}
         {page === "legal"    && (
           <Suspense fallback={
             <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", color: "#c59c55", fontFamily: "'Montserrat', sans-serif", fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase" }}>

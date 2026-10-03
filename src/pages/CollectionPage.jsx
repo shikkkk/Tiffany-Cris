@@ -69,10 +69,10 @@ export default function CollectionPage({ wishlistIds, onWishlistToggle, onViewin
         <div className="product-count">{filtered.length} piece{filtered.length !== 1 ? "s" : ""}</div>
         <div className="product-grid" role="list">
           {filtered.map(bag => (
-            <article className="product-card" key={bag.id} onClick={() => setModal(bag)} role="listitem" aria-label={`${bag.name} â€” ${bag.cat}`}>
+            <article className="product-card" key={bag.id} onClick={() => setModal(bag)} role="listitem" aria-label={`${bag.name} — ${bag.cat}`}>
               <div className="pc-img">
                 {bag.img
-                  ? <img className="pc-img-inner" src={bag.img} alt={`${bag.name} luxury ${bag.cat} â€” Tiffany & Cris`} loading="lazy" />
+                  ? <img className="pc-img-inner" src={bag.img} alt={`${bag.name} luxury ${bag.cat} — Tiffany & Cris`} loading="lazy" />
                   : <div className="pc-img-inner">{bagSvgs[bag.id]}</div>
                 }
                 <button
@@ -80,7 +80,7 @@ export default function CollectionPage({ wishlistIds, onWishlistToggle, onViewin
                   onClick={e => { e.stopPropagation(); onWishlistToggle ? onWishlistToggle(bag.id) : onAuthRequired?.(); }}
                   aria-label={inWishlist(bag.id) ? `Remove ${bag.name} from wishlist` : `Add ${bag.name} to wishlist`}
                 >
-                  {inWishlist(bag.id) ? "â™¥" : "â™¡"}
+                  {inWishlist(bag.id) ? "♥" : "♡"}
                 </button>
               </div>
               <div className="pc-info">
@@ -95,19 +95,19 @@ export default function CollectionPage({ wishlistIds, onWishlistToggle, onViewin
       <div className={`modal-bg${modal ? " open" : ""}`} onClick={e => { if (e.target.classList.contains("modal-bg")) setModal(null); }}>
         {modal && (
           <div className="modal-box">
-            <button className="modal-close-btn" onClick={() => setModal(null)}>âœ• Close</button>
+            <button className="modal-close-btn" onClick={() => setModal(null)}>✕ Close</button>
             <div className="modal-img-side">
               {(modal.imgs?.length > 0 || modal.img) ? (
                 <>
                   <img
                     src={modal.imgs?.length > 0 ? modal.imgs[carouselIdx] : modal.img}
-                    alt={`${modal.name} luxury ${modal.cat} â€” Tiffany & Cris`}
+                    alt={`${modal.name} luxury ${modal.cat} — Tiffany & Cris`}
                     style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }}
                   />
                   {modal.imgs?.length > 1 && (
                     <>
-                      <button className="modal-carousel-arrow modal-carousel-prev" onClick={() => setCarouselIdx(i => (i - 1 + modal.imgs.length) % modal.imgs.length)}>â€¹</button>
-                      <button className="modal-carousel-arrow modal-carousel-next" onClick={() => setCarouselIdx(i => (i + 1) % modal.imgs.length)}>â€º</button>
+                      <button className="modal-carousel-arrow modal-carousel-prev" onClick={() => setCarouselIdx(i => (i - 1 + modal.imgs.length) % modal.imgs.length)}>‹</button>
+                      <button className="modal-carousel-arrow modal-carousel-next" onClick={() => setCarouselIdx(i => (i + 1) % modal.imgs.length)}>›</button>
                       <div className="modal-carousel-dots">
                         {modal.imgs.map((_, i) => (
                           <button key={i} className={`modal-carousel-dot${i === carouselIdx ? " active" : ""}`} onClick={() => setCarouselIdx(i)} />
@@ -134,7 +134,7 @@ export default function CollectionPage({ wishlistIds, onWishlistToggle, onViewin
               </div>
               <div>
                 <button className="modal-btn-primary" onClick={() => onWishlistToggle ? onWishlistToggle(modal.id) : onAuthRequired?.()}>
-                  {inWishlist(modal.id) ? "â™¥ Saved to Wishlist" : "â™¡ Add to Wishlist"}
+                  {inWishlist(modal.id) ? "♥ Saved to Wishlist" : "♡ Add to Wishlist"}
                 </button>
                 <button className="modal-btn-ghost" onClick={() => { onViewingRequest ? onViewingRequest(modal) : onAuthRequired?.(); setModal(null); }}>
                   Request Private Viewing
@@ -147,5 +147,3 @@ export default function CollectionPage({ wishlistIds, onWishlistToggle, onViewin
     </div>
   );
 }
-
-/* â”€â”€ CONTACT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */

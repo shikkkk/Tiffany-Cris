@@ -12,16 +12,16 @@ export const bags = [
     tagline: "Power distilled into perfect structure.",
     img: lvTwist,
     colors: ["#1a1208", "#2a1e14", "#c59c55"],
-    specs: { Material: "Full-grain calfskin", Lining: "Silk jacquard", Hardware: "18k gold-plated", Size: "28 Ã— 20 Ã— 10 cm", Origin: "Florence, Italy" }
+    specs: { Material: "Full-grain calfskin", Lining: "Silk jacquard", Hardware: "18k gold-plated", Size: "28 × 20 × 10 cm", Origin: "Florence, Italy" }
   },
   {
     id: 2, name: "Loop Monogram", cat: "Shoulder Bag", price: 2450,
     badge: null, badgeType: null,
-    desc: "Created by Nicolas GhesquiÃ¨re for the Cruise 2022 Collection, the Loop handbag features a half-moon silhouette, inspired by the Croissant bag from the House archives.",
+    desc: "Created by Nicolas Ghesquière for the Cruise 2022 Collection, the Loop handbag features a half-moon silhouette, inspired by the Croissant bag from the House archives.",
     tagline: "Effortless. Enduring. Unmistakably yours.",
     img: lvLoop,
     colors: ["#3a2a14", "#1a1208"],
-    specs: { Material: "Pebbled lambskin", Lining: "Suede", Hardware: "Antique brass", Size: "32 Ã— 24 Ã— 10 cm", Origin: "France" }
+    specs: { Material: "Pebbled lambskin", Lining: "Suede", Hardware: "Antique brass", Size: "32 × 24 × 10 cm", Origin: "France" }
   },
   {
     id: 3, name: "Speedy Soft 30", cat: "Tote Bag", price: 2890,
@@ -30,7 +30,7 @@ export const bags = [
     tagline: "The bag that defined an era. Reimagined.",
     img: lvSpeedy,
     colors: ["#2a1408", "#1a1a14", "#c59c55"],
-    specs: { Material: "Supple calfskin", Lining: "Cotton canvas", Hardware: "Palladium", Size: "30 Ã— 21 Ã— 17 cm", Origin: "Italy" }
+    specs: { Material: "Supple calfskin", Lining: "Cotton canvas", Hardware: "Palladium", Size: "30 × 21 × 17 cm", Origin: "Italy" }
   },
   {
     id: 4, name: "OnTheGo PM", cat: "Handbag", price: 3600,
@@ -39,7 +39,7 @@ export const bags = [
     tagline: "Architecture you can carry.",
     img: lvOnthego,
     colors: ["#0a0a0a", "#1a1208"],
-    specs: { Material: "Box calfskin", Lining: "Silk satin", Hardware: "Black chrome", Size: "25 Ã— 19 Ã— 11.5 cm", Origin: "Italy" }
+    specs: { Material: "Box calfskin", Lining: "Silk satin", Hardware: "Black chrome", Size: "25 × 19 × 11.5 cm", Origin: "Italy" }
   },
 ];
 
@@ -54,7 +54,7 @@ export const bagSvgs = {
 export const infoCards = [
   {
     title: "Private Atelier",
-    text: "Visit our invite-only atelier in Manila for a bespoke consultation. By appointment only â€” reach out to reserve your exclusive session.",
+    text: "Visit our invite-only atelier in Manila for a bespoke consultation. By appointment only — reach out to reserve your exclusive session.",
     link: "Book an Appointment",
     icon: (
       <svg viewBox="0 0 38 38" fill="none" className="ct-info-icon">
@@ -83,9 +83,7 @@ export const locations = [
   { city: "Manila", addr: "Bonifacio Global City\nTaguig, Metro Manila" },
 ];
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   COMPONENTS
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+
 
 export function BagSilhouette() {
   return (
@@ -100,4 +98,4 @@ export function BagSilhouette() {
   );
 }
 
-/* â”€â”€ AUTH MODAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+

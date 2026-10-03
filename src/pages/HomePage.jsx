@@ -3,7 +3,7 @@ import { supabase } from "../supabase";
 import lvTwist from "../assets/twist.avif";
 import lvLoop from "../assets/loop.avif";
 import lvSpeedy from "../assets/speedy.avif";
-export default function HomePage({ setPage, theme }) {
+export default function HomePage({ setPage, theme, onViewingRequest }) {
   const [previews, setPreviews] = useState(null);
 
   useEffect(() => {
@@ -47,11 +47,11 @@ export default function HomePage({ setPage, theme }) {
           <span className="hero-title-sub block">Luxury Collections</span>
         </h1>
         <p className="hero-desc fade-in delay-3 mt-6 mb-10">
-          Hand-crafted bags forged in midnight and gold â€” for those who wear elegance like a second skin.
+          Hand-crafted bags forged in midnight and gold — for those who wear elegance like a second skin.
         </p>
         <div className="fade-in delay-4 flex flex-wrap gap-4 justify-center">
           <button className="btn-primary" onClick={goCollection}>Explore Collection</button>
-          <button className="btn-secondary" onClick={goContact}>Private Viewing</button>
+          <button className="btn-secondary" onClick={() => onViewingRequest ? onViewingRequest("Exclusive Atelier Preview") : goContact()}>Private Viewing</button>
         </div>
         <div className="fade-in delay-5 mt-16 flex items-center gap-4" style={{ color: isLight ? "var(--tc-muted, #9C8B77)" : "#ddd9d2", fontSize: "9px", letterSpacing: "0.4em", textTransform: "uppercase", fontFamily: "'Montserrat', sans-serif" }}>
           <span style={{ width: 60, height: 1, background: isLight ? "var(--tc-border, rgba(158,103,40,0.3))" : "rgba(235,221,221,0.2)", display: "inline-block" }}/>
@@ -67,7 +67,7 @@ export default function HomePage({ setPage, theme }) {
             Where <span style={{ color: accentSpan }}>obsidian</span> meets <span style={{ color: goldClr }}>gold.</span>
           </h2>
           <p style={{ color: bodyTextClr, fontSize: "15px", lineHeight: 1.8, maxWidth: "520px", margin: "0 auto", fontFamily: "'Montserrat', sans-serif" }}>
-            Each Tiffany &amp; Cris piece is carefully curated from the world's most renowned ateliers â€” from the finest Italian leathers to Parisian hand-finished clasps â€” ensuring every item reflects timeless luxury and craftsmanship.
+            Each Tiffany &amp; Cris piece is carefully curated from the world's most renowned ateliers — from the finest Italian leathers to Parisian hand-finished clasps — ensuring every item reflects timeless luxury and craftsmanship.
           </p>
         </div>
       </section>
@@ -82,9 +82,9 @@ export default function HomePage({ setPage, theme }) {
             {displayPreviews.map((item) => (
               <div key={item.id} className="group cursor-pointer" onClick={goCollection}>
                 <div className="h-[380px] border border-[rgba(197,156,85,0.15)] relative overflow-hidden">
-                  <img src={item.image_url} alt={`${item.name} â€” Tiffany & Cris luxury collection`} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }} />
+                  <img src={item.image_url} alt={`${item.name} — Tiffany & Cris luxury collection`} loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }} />
                   <div className="absolute inset-0 bg-black/40 flex items-end p-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "9px", fontWeight: 600, letterSpacing: "0.28em", textTransform: "uppercase", color: "#c59c55", border: "1px solid rgba(197,156,85,0.6)", padding: "10px 18px", background: "rgba(5,4,3,0.85)", width: "100%", textAlign: "center", display: "block" }}>View Collection â†’</span>
+                    <span style={{ fontFamily: "'Montserrat', sans-serif", fontSize: "9px", fontWeight: 600, letterSpacing: "0.28em", textTransform: "uppercase", color: "#c59c55", border: "1px solid rgba(197,156,85,0.6)", padding: "10px 18px", background: "rgba(5,4,3,0.85)", width: "100%", textAlign: "center", display: "block" }}>View Collection →</span>
                   </div>
                 </div>
                 <p className="mt-4 text-sm font-montserrat tracking-widest uppercase" style={{ color: isLight ? "var(--tc-muted, #9C8B77)" : "#9a8a70" }}>{item.name}</p>
@@ -99,5 +99,3 @@ export default function HomePage({ setPage, theme }) {
     </div>
   );
 }
-
-/* â”€â”€ WISHLIST PAGE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */

@@ -64,10 +64,10 @@ export default function WishlistPage({ user, wishlistIds, setPage, onWishlistTog
               <div className="product-card" key={bag.id} onClick={() => setModal(bag)}>
                 <div className="pc-img">
                   {bag.img
-                    ? <img className="pc-img-inner" src={bag.img} alt={`${bag.name} luxury ${bag.cat} â€” Tiffany & Cris`} loading="lazy" />
+                    ? <img className="pc-img-inner" src={bag.img} alt={`${bag.name} luxury ${bag.cat} — Tiffany & Cris`} loading="lazy" />
                     : <div className="pc-img-inner" />
                   }
-                  <button className="pc-wish-btn on" onClick={e => { e.stopPropagation(); onWishlistToggle(bag.id); }} aria-label={`Remove ${bag.name} from wishlist`}>â™¥</button>
+                  <button className="pc-wish-btn on" onClick={e => { e.stopPropagation(); onWishlistToggle(bag.id); }} aria-label={`Remove ${bag.name} from wishlist`}>♥</button>
                 </div>
                 <div className="pc-info">
                   <div className="pc-cat">{bag.cat}</div>
@@ -82,19 +82,19 @@ export default function WishlistPage({ user, wishlistIds, setPage, onWishlistTog
       <div className={`modal-bg${modal ? " open" : ""}`} onClick={e => { if (e.target.classList.contains("modal-bg")) setModal(null); }}>
         {modal && (
           <div className="modal-box">
-            <button className="modal-close-btn" onClick={() => setModal(null)}>âœ• Close</button>
+            <button className="modal-close-btn" onClick={() => setModal(null)}>✕ Close</button>
             <div className="modal-img-side">
               {(modal.imgs?.length > 0 || modal.img) ? (
                 <>
                   <img
                     src={modal.imgs?.length > 0 ? modal.imgs[wishCarouselIdx] : modal.img}
-                    alt={`${modal.name} luxury ${modal.cat} â€” Tiffany & Cris`}
+                    alt={`${modal.name} luxury ${modal.cat} — Tiffany & Cris`}
                     style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block" }}
                   />
                   {modal.imgs?.length > 1 && (
                     <>
-                      <button className="modal-carousel-arrow modal-carousel-prev" onClick={() => setWishCarouselIdx(i => (i - 1 + modal.imgs.length) % modal.imgs.length)}>â€¹</button>
-                      <button className="modal-carousel-arrow modal-carousel-next" onClick={() => setWishCarouselIdx(i => (i + 1) % modal.imgs.length)}>â€º</button>
+                      <button className="modal-carousel-arrow modal-carousel-prev" onClick={() => setWishCarouselIdx(i => (i - 1 + modal.imgs.length) % modal.imgs.length)}>‹</button>
+                      <button className="modal-carousel-arrow modal-carousel-next" onClick={() => setWishCarouselIdx(i => (i + 1) % modal.imgs.length)}>›</button>
                       <div className="modal-carousel-dots">
                         {modal.imgs.map((_, i) => (
                           <button key={i} className={`modal-carousel-dot${i === wishCarouselIdx ? " active" : ""}`} onClick={() => setWishCarouselIdx(i)} />
@@ -119,7 +119,7 @@ export default function WishlistPage({ user, wishlistIds, setPage, onWishlistTog
                 </div>
               </div>
               <div>
-                <button className="modal-btn-primary" onClick={() => { onWishlistToggle(modal.id); setModal(null); }}>â™¥ Remove from Wishlist</button>
+                <button className="modal-btn-primary" onClick={() => { onWishlistToggle(modal.id); setModal(null); }}>♥ Remove from Wishlist</button>
                 <button className="modal-btn-ghost" onClick={() => { onViewingRequest(modal); setModal(null); }}>Request Private Viewing</button>
               </div>
             </div>
@@ -130,4 +130,4 @@ export default function WishlistPage({ user, wishlistIds, setPage, onWishlistTog
   );
 }
 
-/* â”€â”€ COLLECTION â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+

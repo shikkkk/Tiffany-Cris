@@ -2,7 +2,7 @@ import { useState } from "react";
 import { supabase } from "../supabase";
 import { infoCards, locations } from "./catalog";
 
-export default function ContactPage() {
+export default function ContactPage({ onViewingRequest }) {
   const [form, setForm] = useState({ name: "", email: "", phone: "", subject: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -106,7 +106,17 @@ export default function ContactPage() {
               {card.icon}
               <div className="ct-info-title">{card.title}</div>
               <p className="ct-info-text">{card.text}</p>
-              <button className="ct-info-link" type="button">{card.link} â†’</button>
+              {card.link.includes('@') ? (
+                <a className="ct-info-link" href={`mailto:${card.link}`}>{card.link} →</a>
+              ) : (
+                <button
+                  className="ct-info-link"
+                  type="button"
+                  onClick={() => onViewingRequest?.("Bespoke Atelier Consultation")}
+                >
+                  {card.link} →
+                </button>
+              )}
             </div>
           ))}
 
@@ -128,7 +138,5 @@ export default function ContactPage() {
   );
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   ROOT APP
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+
 
