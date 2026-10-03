@@ -264,6 +264,8 @@ const Ico = {
   trash:   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>,
   upload:  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>,
   menu:    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>,
+  mail:    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>,
+  reply:   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>,
 };
 
 /* ─── TOAST ──────────────────────────────────────────────────────────── */
@@ -374,12 +376,13 @@ function LoginScreen({ onExit }) {
 }
 
 /* ─── SIDEBAR ────────────────────────────────────────────────────────── */
-function Sidebar({ tab, setTab, onSignOut, onExit, open, onClose }) {
+function Sidebar({ tab, setTab, onSignOut, onExit, open, onClose, unreadMsgCount }) {
   const navItems = [
     { key: "overview",     label: "Overview",     icon: Ico.home },
     { key: "collections",  label: "Collections",  icon: Ico.grid },
     { key: "users",        label: "Users",        icon: Ico.users },
     { key: "requests",     label: "Requests",     icon: Ico.eye },
+    { key: "messages",     label: "Messages",     icon: Ico.mail, badge: unreadMsgCount },
   ];
   return (
     <aside className={`adm-sb${open ? " open" : ""}`}>
@@ -389,9 +392,15 @@ function Sidebar({ tab, setTab, onSignOut, onExit, open, onClose }) {
       </div>
       <nav className="adm-sb-nav">
         <div className="adm-sb-sec">Menu</div>
-        {navItems.map(({ key, label, icon }) => (
+        {navItems.map(({ key, label, icon, badge }) => (
           <button key={key} className={`adm-sb-item${tab === key ? " on" : ""}`} onClick={() => { setTab(key); onClose?.(); }}>
-            {icon} {label}
+            {icon}
+            <span style={{ flex: 1 }}>{label}</span>
+            {badge > 0 && (
+              <span className="adm-badge-gold" style={{ fontSize: "10px", padding: "1px 6px", borderRadius: "10px", lineHeight: "1.4" }}>
+                {badge}
+              </span>
+            )}
           </button>
         ))}
       </nav>
@@ -615,10 +624,10 @@ function CollectionForm({ editItem, onSave, onClose }) {
 }
 
 /* ─── OVERVIEW PANEL ─────────────────────────────────────────────────── */
-function OverviewPanel({ colCount, userCount, recent }) {
+function OverviewPanel({ colCount, userCount, reqCount, msgCount, unreadMsgCount, recent }) {
   return (
     <div>
-      <div className="adm-stats">
+      <div className="adm-stats" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))" }}>
         <div className="adm-stat">
           <div className="adm-stat-label">Total Collections</div>
           <div className="adm-stat-val">{colCount}</div>
@@ -630,9 +639,14 @@ function OverviewPanel({ colCount, userCount, recent }) {
           <div className="adm-stat-hint">All time</div>
         </div>
         <div className="adm-stat">
-          <div className="adm-stat-label">Categories</div>
-          <div className="adm-stat-val">{CATS.length}</div>
-          <div className="adm-stat-hint">Collection types</div>
+          <div className="adm-stat-label">Viewing Requests</div>
+          <div className="adm-stat-val">{reqCount}</div>
+          <div className="adm-stat-hint">Private appointments</div>
+        </div>
+        <div className="adm-stat">
+          <div className="adm-stat-label">Client Messages</div>
+          <div className="adm-stat-val">{msgCount}</div>
+          <div className="adm-stat-hint">{unreadMsgCount > 0 ? `${unreadMsgCount} unread` : "All caught up"}</div>
         </div>
       </div>
 
@@ -988,6 +1002,330 @@ function RequestsPanel({ onCountChange }) {
   );
 }
 
+/* ─── MESSAGES PANEL ─────────────────────────────────────────────────── */
+function MessagesPanel({ onUnreadChange }) {
+  const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All"); // All | unread | read
+  const [viewingMsg, setViewingMsg] = useState(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+
+  const load = useCallback(async () => {
+    const { data } = await supabase
+      .from("messages")
+      .select("*")
+      .order("created_at", { ascending: false });
+    const list = data || [];
+    setMessages(list);
+    onUnreadChange?.(list.filter(m => m.status !== "read").length);
+    setLoading(false);
+  }, [onUnreadChange]);
+
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { load(); }, [load]);
+
+  async function updateStatus(id, newStatus) {
+    await supabase.from("messages").update({ status: newStatus }).eq("id", id);
+    setMessages(prev => {
+      const updated = prev.map(m => m.id === id ? { ...m, status: newStatus } : m);
+      onUnreadChange?.(updated.filter(m => m.status !== "read").length);
+      return updated;
+    });
+    if (viewingMsg?.id === id) {
+      setViewingMsg(prev => prev ? { ...prev, status: newStatus } : null);
+    }
+  }
+
+  async function handleDelete(id) {
+    await supabase.from("messages").delete().eq("id", id);
+    setMessages(prev => {
+      const updated = prev.filter(m => m.id !== id);
+      onUnreadChange?.(updated.filter(m => m.status !== "read").length);
+      return updated;
+    });
+    if (viewingMsg?.id === id) setViewingMsg(null);
+    setConfirmDeleteId(null);
+  }
+
+  function openMessage(msg) {
+    setViewingMsg(msg);
+    if (msg.status !== "read") {
+      updateStatus(msg.id, "read");
+    }
+  }
+
+  const unreadCount = messages.filter(m => m.status !== "read").length;
+
+  const filtered = messages.filter(m => {
+    const q = search.toLowerCase();
+    const matchSearch =
+      m.name?.toLowerCase().includes(q) ||
+      m.email?.toLowerCase().includes(q) ||
+      m.phone?.toLowerCase().includes(q) ||
+      m.subject?.toLowerCase().includes(q) ||
+      m.message?.toLowerCase().includes(q);
+    const isUnread = m.status !== "read";
+    const matchStatus =
+      statusFilter === "All" ||
+      (statusFilter === "unread" && isUnread) ||
+      (statusFilter === "read" && !isUnread);
+    return matchSearch && matchStatus;
+  });
+
+  return (
+    <>
+      <div className="adm-card">
+        <div className="adm-card-head">
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+            <span className="adm-card-title">
+              Customer Messages ({messages.length})
+              {unreadCount > 0 && (
+                <span className="adm-badge-gold" style={{ marginLeft: "8px", fontSize: "11px" }}>
+                  {unreadCount} unread
+                </span>
+              )}
+            </span>
+            <div style={{ display: "flex", gap: "6px" }}>
+              {[
+                { key: "All", label: "All" },
+                { key: "unread", label: `Unread (${unreadCount})` },
+                { key: "read", label: "Read" },
+              ].map(({ key, label }) => (
+                <button
+                  key={key}
+                  className={`adm-btn adm-btn-sm ${statusFilter === key ? "adm-btn-gold" : "adm-btn-white"}`}
+                  onClick={() => setStatusFilter(key)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="adm-search">
+            {Ico.search}
+            <input
+              placeholder="Search sender, email, subject, text..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="adm-loading">Loading messages...</div>
+        ) : filtered.length === 0 ? (
+          <div className="adm-empty">No messages found.</div>
+        ) : (
+          <table className="adm-table">
+            <thead>
+              <tr>
+                <th className="adm-th">Sender</th>
+                <th className="adm-th">Subject</th>
+                <th className="adm-th">Message</th>
+                <th className="adm-th">Status</th>
+                <th className="adm-th">Received</th>
+                <th className="adm-th" style={{ textAlign: "right" }}>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map(m => {
+                const isUnread = m.status !== "read";
+                return (
+                  <tr
+                    key={m.id}
+                    className="adm-tr"
+                    style={{ background: isUnread ? "rgba(197, 156, 85, 0.04)" : undefined, cursor: "pointer" }}
+                    onClick={() => openMessage(m)}
+                  >
+                    <td className="adm-td">
+                      <div style={{ fontWeight: isUnread ? 600 : 500, color: isUnread ? "#1e293b" : "#475569" }}>
+                        {m.name || "Anonymous"}
+                      </div>
+                      <div style={{ fontSize: "11px", color: "#94a3b8" }}>
+                        {m.email}
+                        {m.phone && ` · ${m.phone}`}
+                      </div>
+                    </td>
+                    <td className="adm-td">
+                      <span className="adm-tag" style={{ fontWeight: 500 }}>
+                        {m.subject || "General Enquiry"}
+                      </span>
+                    </td>
+                    <td className="adm-td" style={{ maxWidth: 260 }}>
+                      <div style={{
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        fontSize: "12px",
+                        color: isUnread ? "#334155" : "#64748b",
+                        fontWeight: isUnread ? 500 : 400
+                      }}>
+                        {m.message}
+                      </div>
+                    </td>
+                    <td className="adm-td">
+                      {isUnread ? (
+                        <span style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "5px",
+                          fontSize: "10px",
+                          fontWeight: 600,
+                          padding: "2px 8px",
+                          borderRadius: "12px",
+                          background: "#fdf8f0",
+                          color: "#b45309",
+                          border: "1px solid rgba(197,156,85,0.4)"
+                        }}>
+                          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#f59e0b" }} />
+                          Unread
+                        </span>
+                      ) : (
+                        <span style={{
+                          display: "inline-block",
+                          fontSize: "10px",
+                          fontWeight: 500,
+                          padding: "2px 8px",
+                          borderRadius: "12px",
+                          background: "#f8fafc",
+                          color: "#64748b",
+                          border: "1px solid #e2e8f0"
+                        }}>
+                          Read
+                        </span>
+                      )}
+                    </td>
+                    <td className="adm-td" style={{ color: "#94a3b8", fontSize: "12px", whiteSpace: "nowrap" }}>
+                      {new Date(m.created_at).toLocaleDateString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    </td>
+                    <td className="adm-td" style={{ textAlign: "right" }} onClick={e => e.stopPropagation()}>
+                      <div className="adm-actions" style={{ justifyContent: "flex-end" }}>
+                        <button
+                          className="adm-btn adm-btn-white adm-btn-sm"
+                          title="View Message"
+                          onClick={() => openMessage(m)}
+                        >
+                          View
+                        </button>
+                        <a
+                          className="adm-btn adm-btn-white adm-btn-sm"
+                          title="Reply via Email"
+                          href={`mailto:${encodeURIComponent(m.email)}?subject=${encodeURIComponent(`Re: ${m.subject || "Your Inquiry"} — Tiffany & Cris Atelier`)}`}
+                          style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "4px" }}
+                        >
+                          {Ico.reply}
+                        </a>
+                        <button
+                          className="adm-btn adm-btn-red adm-btn-sm"
+                          title="Delete Message"
+                          onClick={() => setConfirmDeleteId(m.id)}
+                        >
+                          {Ico.trash}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {/* Message Viewer Modal */}
+      {viewingMsg && (
+        <div className="adm-modal-bg" onClick={() => setViewingMsg(null)}>
+          <div
+            className="adm-modal"
+            style={{ maxWidth: "600px" }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
+              <div>
+                <span className="adm-tag" style={{ marginBottom: "6px", display: "inline-block" }}>
+                  {viewingMsg.subject || "General Enquiry"}
+                </span>
+                <h3 style={{ fontSize: "18px", margin: "4px 0" }}>{viewingMsg.name || "Anonymous Client"}</h3>
+                <div style={{ fontSize: "12px", color: "#64748b" }}>
+                  <a href={`mailto:${viewingMsg.email}`} style={{ color: "#c59c55", textDecoration: "none" }}>{viewingMsg.email}</a>
+                  {viewingMsg.phone && (
+                    <>
+                      {" · "}
+                      <a href={`tel:${viewingMsg.phone}`} style={{ color: "#64748b", textDecoration: "none" }}>{viewingMsg.phone}</a>
+                    </>
+                  )}
+                </div>
+              </div>
+              <div style={{ fontSize: "11px", color: "#94a3b8", textAlign: "right" }}>
+                {new Date(viewingMsg.created_at).toLocaleString()}
+              </div>
+            </div>
+
+            <div style={{
+              background: "rgba(0,0,0,0.03)",
+              border: "1px solid #e2e8f0",
+              borderRadius: "6px",
+              padding: "16px",
+              fontSize: "13px",
+              lineHeight: "1.7",
+              color: "inherit",
+              whiteSpace: "pre-wrap",
+              maxHeight: "340px",
+              overflowY: "auto",
+              marginBottom: "20px"
+            }}>
+              {viewingMsg.message}
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
+              <div style={{ display: "flex", gap: "8px" }}>
+                <button
+                  className="adm-btn adm-btn-white"
+                  onClick={() => updateStatus(viewingMsg.id, viewingMsg.status === "read" ? "unread" : "read")}
+                >
+                  Mark as {viewingMsg.status === "read" ? "Unread" : "Read"}
+                </button>
+                <button
+                  className="adm-btn adm-btn-red"
+                  onClick={() => setConfirmDeleteId(viewingMsg.id)}
+                >
+                  Delete
+                </button>
+              </div>
+              <div style={{ display: "flex", gap: "8px" }}>
+                <a
+                  className="adm-btn adm-btn-gold"
+                  href={`mailto:${encodeURIComponent(viewingMsg.email)}?subject=${encodeURIComponent(`Re: ${viewingMsg.subject || "Your Inquiry"} — Tiffany & Cris Atelier`)}`}
+                  style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "6px" }}
+                >
+                  {Ico.mail} Reply via Email
+                </a>
+                <button
+                  className="adm-btn adm-btn-white"
+                  onClick={() => setViewingMsg(null)}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation */}
+      {confirmDeleteId && (
+        <Confirm
+          title="Delete Customer Message"
+          msg="Are you sure you want to permanently delete this customer message? This action cannot be undone."
+          onOk={() => handleDelete(confirmDeleteId)}
+          onCancel={() => setConfirmDeleteId(null)}
+        />
+      )}
+    </>
+  );
+}
+
 /* ─── ROOT ───────────────────────────────────────────────────────────── */
 export default function AdminPage({ onExit }) {
   const [user, setUser] = useState(null);
@@ -996,6 +1334,9 @@ export default function AdminPage({ onExit }) {
   const [tab, setTab] = useState("overview");
   const [colCount, setColCount] = useState(0);
   const [userCount, setUserCount] = useState(0);
+  const [reqCount, setReqCount] = useState(0);
+  const [msgCount, setMsgCount] = useState(0);
+  const [unreadMsgCount, setUnreadMsgCount] = useState(0);
   const [recentCols, setRecentCols] = useState([]);
   const [adminTheme, setAdminTheme] = useState(() => localStorage.getItem("adm-theme") || "light");
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -1045,9 +1386,22 @@ export default function AdminPage({ onExit }) {
       .then(({ data }) => { setColCount(data?.length || 0); setRecentCols(data || []); });
     supabase.from("Users").select("id")
       .then(({ data }) => setUserCount(data?.length || 0));
+    supabase.from("viewing_requests").select("id")
+      .then(({ data }) => setReqCount(data?.length || 0));
+    supabase.from("messages").select("id, status")
+      .then(({ data }) => {
+        setMsgCount(data?.length || 0);
+        setUnreadMsgCount(data?.filter(m => m.status !== "read").length || 0);
+      });
   }, [user, isAdmin]);
 
-  const titles = { overview: "Overview", collections: "Collections", users: "Users", requests: "Viewing Requests" };
+  const titles = {
+    overview: "Overview",
+    collections: "Collections",
+    users: "Users",
+    requests: "Viewing Requests",
+    messages: "Customer Messages"
+  };
 
   const darkClass = adminTheme === "dark" ? " dark" : "";
 
@@ -1096,7 +1450,8 @@ export default function AdminPage({ onExit }) {
       <style>{S}</style>
       <div className={"adm" + darkClass}>
         <div className={`adm-sb-mask${sidebarOpen ? " open" : ""}`} onClick={() => setSidebarOpen(false)} />
-        <Sidebar tab={tab} setTab={setTab} user={user} open={sidebarOpen} onClose={() => setSidebarOpen(false)}
+        <Sidebar tab={tab} setTab={setTab} open={sidebarOpen} onClose={() => setSidebarOpen(false)}
+          unreadMsgCount={unreadMsgCount}
           onSignOut={async () => { await supabase.auth.signOut(); window.location.href = "/"; }} onExit={onExit} />
         <div className="adm-main">
           <div className="adm-topbar">
@@ -1117,10 +1472,11 @@ export default function AdminPage({ onExit }) {
             </div>
           </div>
           <div className="adm-content">
-            {tab === "overview"    && <OverviewPanel colCount={colCount} userCount={userCount} recent={recentCols} />}
+            {tab === "overview"    && <OverviewPanel colCount={colCount} userCount={userCount} reqCount={reqCount} msgCount={msgCount} unreadMsgCount={unreadMsgCount} recent={recentCols} />}
             {tab === "collections" && <CollectionsPanel onCountChange={setColCount} />}
             {tab === "users"       && <UsersPanel />}
-            {tab === "requests"    && <RequestsPanel />}
+            {tab === "requests"    && <RequestsPanel onCountChange={setReqCount} />}
+            {tab === "messages"    && <MessagesPanel onUnreadChange={setUnreadMsgCount} />}
           </div>
         </div>
       </div>
