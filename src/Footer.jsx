@@ -79,7 +79,7 @@ export default function Footer({ setPage, onOpenLegal, theme = "dark" }) {
             Authenticity Guarantee
           </button>
           <button className="ct-f-link" type="button" onClick={() => handleLegal("terms")}>
-            Privacy &amp; Data Protection
+            Terms &amp; Privacy
           </button>
         </div>
 

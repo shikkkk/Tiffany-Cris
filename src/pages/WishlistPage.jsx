@@ -1,14 +1,5 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../supabase";
-import { bagSvgs } from "./catalog";
-
-const SUPA_URL = "https://ldvsjfgeornlispaefjf.supabase.co";
-const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdWJhYmFzZSIsInJlZiI6ImxkdnNqZmdlb3JubGlzcGFlZmpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4OTIwODAsImV4cCI6MjA5MzQ2ODA4MH0.IpT6BlTpWekM8nbk21gtkkkv_693wR8nRP6uuN32YTY";
-const supaHeaders = { apikey: SUPA_KEY, Authorization: `Bearer ${SUPA_KEY}` };
-async function supaFetch(path) {
-  const response = await fetch(`${SUPA_URL}/rest/v1/${path}`, { headers: supaHeaders });
-  return response.json();
-}
 
 export default function WishlistPage({ user, wishlistIds, setPage, onWishlistToggle, onViewingRequest, onAuthRequired }) {
   const [items, setItems] = useState([]);
@@ -21,10 +12,10 @@ export default function WishlistPage({ user, wishlistIds, setPage, onWishlistTog
   useEffect(() => {
     if (!user) { setLoading(false); return; }
     if (wishlistIds.size === 0) { setItems([]); setLoading(false); return; }
-    const ids = [...wishlistIds].join(",");
-    supaFetch(`collections?select=*&id=in.(${ids})`)
-      .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
+    const ids = [...wishlistIds];
+    supabase.from("collections").select("*").in("id", ids)
+      .then(({ data, error }) => {
+        if (!error && Array.isArray(data) && data.length > 0) {
           setItems(data.map(item => ({
             id: item.id, name: item.name, cat: item.category, price: item.price,
             img: item.image_url,

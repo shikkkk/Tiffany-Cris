@@ -2,14 +2,6 @@ import { useEffect, useState } from "react";
 import { supabase } from "../supabase";
 import { bags, bagSvgs, TABS } from "./catalog";
 
-const SUPA_URL = "https://ldvsjfgeornlispaefjf.supabase.co";
-const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdWJhYmFzZSIsInJlZiI6ImxkdnNqZmdlb3JubGlzcGFlZmpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4OTIwODAsImV4cCI6MjA5MzQ2ODA4MH0.IpT6BlTpWekM8nbk21gtkkkv_693wR8nRP6uuN32YTY";
-const supaHeaders = { apikey: SUPA_KEY, Authorization: `Bearer ${SUPA_KEY}` };
-async function supaFetch(path) {
-  const response = await fetch(`${SUPA_URL}/rest/v1/${path}`, { headers: supaHeaders });
-  return response.json();
-}
-
 export default function CollectionPage({ user, wishlistIds, onWishlistToggle, onViewingRequest, onAuthRequired }) {
   const [activeTab, setActiveTab] = useState("All");
   const [sort, setSort] = useState("");
@@ -20,9 +12,9 @@ export default function CollectionPage({ user, wishlistIds, onWishlistToggle, on
   useEffect(() => { setCarouselIdx(0); }, [modal?.id]);
 
   useEffect(() => {
-    supaFetch("collections?select=*&order=created_at.desc")
-      .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
+    supabase.from("collections").select("*").order("created_at", { ascending: false })
+      .then(({ data, error }) => {
+        if (!error && Array.isArray(data) && data.length > 0) {
           setLiveBags(data.map(item => ({
             id: item.id, name: item.name, cat: item.category, price: item.price,
             badge: item.badge, badgeType: item.badge_type, desc: item.description,
