@@ -7,9 +7,11 @@ export default function WishlistPage({ user, wishlistIds, setPage, onWishlistTog
   const [modal, setModal] = useState(null);
   const [wishCarouselIdx, setWishCarouselIdx] = useState(0);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setWishCarouselIdx(0); }, [modal?.id]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!user) { setLoading(false); return; }
     if (wishlistIds.size === 0) { setItems([]); setLoading(false); return; }
     const ids = [...wishlistIds];

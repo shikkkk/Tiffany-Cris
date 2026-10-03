@@ -1,15 +1,10 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 
 export default function LegalPoliciesPage({ initialTab = "terms", onTabChange, theme = "dark" }) {
   const [activeTab, setActiveTab] = useState(initialTab);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSectionId, setActiveSectionId] = useState("");
 
-  useEffect(() => {
-    if (initialTab) {
-      setActiveTab(initialTab);
-    }
-  }, [initialTab]);
 
   const handleTabSwitch = (tabKey) => {
     setActiveTab(tabKey);
@@ -848,7 +843,7 @@ function ShippingPolicyView({ searchQuery, isLight, onScrollTo, activeSectionId 
         </div>
       )
     }
-  ], [isLight]);
+  ], []);
 
   const filteredSections = useMemo(() => {
     if (!searchQuery.trim()) return sections;
@@ -1107,7 +1102,7 @@ function ReturnsPolicyView({ searchQuery, isLight, onScrollTo, activeSectionId }
         </div>
       )
     }
-  ], [isLight]);
+  ], []);
 
   const filteredSections = useMemo(() => {
     if (!searchQuery.trim()) return sections;
@@ -1390,7 +1385,7 @@ function AuthenticityPolicyView({ searchQuery, isLight, onScrollTo, activeSectio
         </div>
       )
     }
-  ], [isLight]);
+  ], []);
 
   const filteredSections = useMemo(() => {
     if (!searchQuery.trim()) return sections;

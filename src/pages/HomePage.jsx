@@ -1,19 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../supabase";
-import { BagSilhouette, bagSvgs } from "./catalog";
 import lvTwist from "../assets/twist.avif";
 import lvLoop from "../assets/loop.avif";
 import lvSpeedy from "../assets/speedy.avif";
-import lvOnthego from "../assets/onthego.avif";
-
-const SUPA_URL = "https://ldvsjfgeornlispaefjf.supabase.co";
-const SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdWJhYmFzZSIsInJlZiI6ImxkdnNqZmdlb3JubGlzcGFlZmpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4OTIwODAsImV4cCI6MjA5MzQ2ODA4MH0.IpT6BlTpWekM8nbk21gtkkkv_693wR8nRP6uuN32YTY";
-const supaHeaders = { apikey: SUPA_KEY, Authorization: `Bearer ${SUPA_KEY}` };
-async function supaFetch(path) {
-  const response = await fetch(`${SUPA_URL}/rest/v1/${path}`, { headers: supaHeaders });
-  return response.json();
-}
-
 export default function HomePage({ setPage, theme }) {
   const [previews, setPreviews] = useState(null);
 

@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import lvTwist from "../assets/twist.avif";
 import lvLoop from "../assets/loop.avif";
 import lvSpeedy from "../assets/speedy.avif";

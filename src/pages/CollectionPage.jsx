@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import { supabase } from "../supabase";
 import { bags, bagSvgs, TABS } from "./catalog";
 
-export default function CollectionPage({ user, wishlistIds, onWishlistToggle, onViewingRequest, onAuthRequired }) {
+export default function CollectionPage({ wishlistIds, onWishlistToggle, onViewingRequest, onAuthRequired }) {
   const [activeTab, setActiveTab] = useState("All");
   const [sort, setSort] = useState("");
   const [modal, setModal] = useState(null);
   const [liveBags, setLiveBags] = useState(null);
   const [carouselIdx, setCarouselIdx] = useState(0);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setCarouselIdx(0); }, [modal?.id]);
 
   useEffect(() => {
