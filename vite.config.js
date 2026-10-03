@@ -7,4 +7,15 @@ export default defineConfig({
   server: {
     port: 8080,
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('@supabase')) {
+            return 'vendor-supabase';
+          }
+        },
+      },
+    },
+  },
 })

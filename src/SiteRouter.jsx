@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { supabase } from "./supabase";
 
-import AdminPage from "./pages/AdminPage";
-import LegalPoliciesPage from "./pages/LegalPoliciesPage";
+const AdminPage = lazy(() => import("./pages/AdminPage"));
+const LegalPoliciesPage = lazy(() => import("./pages/LegalPoliciesPage"));
 import Footer from "./Footer";
 import siteLogo from "./assets/tiff logo.png";
 import HomePage from "./pages/HomePage";
@@ -713,7 +713,15 @@ export default function SiteRouter() {
   }
 
   if (isAdmin) {
-    return <AdminPage onExit={() => window.location.href = "/"} />;
+    return (
+      <Suspense fallback={
+        <div style={{ minHeight: "100vh", background: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center", color: "#c59c55", fontFamily: "'Inter', sans-serif", fontSize: "13px" }}>
+          Loading Admin Atelier...
+        </div>
+      }>
+        <AdminPage onExit={() => window.location.href = "/"} />
+      </Suspense>
+    );
   }
 
   return (
@@ -746,16 +754,22 @@ export default function SiteRouter() {
         )}
         {page === "contact"  && <ContactPage/>}
         {page === "legal"    && (
-          <LegalPoliciesPage
-            initialTab={policyTab}
-            onTabChange={(tab) => {
-              setPolicyTab(tab);
-              const url = new URL(window.location);
-              url.searchParams.set("policy", tab);
-              window.history.pushState({}, "", url);
-            }}
-            theme={theme}
-          />
+          <Suspense fallback={
+            <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", color: "#c59c55", fontFamily: "'Montserrat', sans-serif", fontSize: "11px", letterSpacing: "0.2em", textTransform: "uppercase" }}>
+              Loading Policies...
+            </div>
+          }>
+            <LegalPoliciesPage
+              initialTab={policyTab}
+              onTabChange={(tab) => {
+                setPolicyTab(tab);
+                const url = new URL(window.location);
+                url.searchParams.set("policy", tab);
+                window.history.pushState({}, "", url);
+              }}
+              theme={theme}
+            />
+          </Suspense>
         )}
       </main>
 
