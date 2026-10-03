@@ -107,6 +107,7 @@ const S = `
   .adm-img-toggle button.on { background: #fffbf5; color: #c59c55; }
   .adm-dropzone { border: 2px dashed #e2e8f0; border-radius: 6px; padding: 28px 20px; text-align: center; cursor: pointer; position: relative; background: #fafafa; transition: all 0.15s; }
   .adm-dropzone:hover { border-color: #c59c55; background: #fffbf5; }
+  .adm-dropzone.dragging { border-color: #c59c55; background: #fffbf5; }
   .adm-dropzone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
   .adm-dropzone-text { font-size: 13px; color: #94a3b8; line-height: 1.8; }
   .adm-dropzone-text b { color: #c59c55; }
@@ -119,6 +120,8 @@ const S = `
   .adm-imgs-thumb { width: 100%; height: 100%; object-fit: cover; display: block; }
   .adm-imgs-rm { position: absolute; top: 4px; right: 4px; width: 20px; height: 20px; border-radius: 50%; background: rgba(0,0,0,0.6); color: #fff; border: none; font-size: 16px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
   .adm-imgs-cover { position: absolute; bottom: 4px; left: 4px; font-size: 9px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; background: #c59c55; color: #fff; padding: 2px 6px; border-radius: 3px; }
+  .adm-imgs-make-cover { position: absolute; bottom: 4px; left: 4px; font-size: 9px; font-weight: 600; text-transform: uppercase; background: rgba(0,0,0,0.7); color: #fff; border: none; padding: 2px 6px; border-radius: 3px; cursor: pointer; transition: background 0.15s; }
+  .adm-imgs-make-cover:hover { background: #c59c55; }
   .adm-imgs-add-tile { aspect-ratio: 1; border: 2px dashed #e2e8f0; border-radius: 5px; background: #fafafa; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 20px; color: #c59c55; font-family: 'Inter', sans-serif; transition: all 0.15s; }
   .adm-imgs-add-tile span:last-child { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94a3b8; }
   .adm-imgs-add-tile:hover { border-color: #c59c55; background: #fffbf5; }
@@ -434,40 +437,74 @@ function CollectionForm({ editItem, onSave, onClose }) {
     return [];
   });
   const [showAdd, setShowAdd] = useState(false);
-  const [addMode, setAddMode] = useState("url");
+  const [addMode, setAddMode] = useState("upload");
   const [addUrl, setAddUrl] = useState("");
   const [addFile, setAddFile] = useState(null);
   const [addPreview, setAddPreview] = useState(null);
   const [addProgress, setAddProgress] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploadError, setUploadError] = useState("");
   const [saving, setSaving] = useState(false);
   const fileRef = useRef();
 
+  function handleFileSelect(file) {
+    if (!file || !file.type.startsWith("image/")) {
+      setUploadError("Please select a valid image file (JPEG, PNG, WebP, AVIF).");
+      return;
+    }
+    setUploadError("");
+    setAddFile(file);
+    setAddPreview(URL.createObjectURL(file));
+  }
+
   function handleAddFileChange(e) {
     const f = e.target.files[0];
-    if (!f) return;
-    setAddFile(f);
-    setAddPreview(URL.createObjectURL(f));
+    if (f) handleFileSelect(f);
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    setIsDragging(false);
+    const f = e.dataTransfer?.files?.[0];
+    if (f) handleFileSelect(f);
   }
 
   async function uploadImage(file) {
-    const path = `images/${Date.now()}_${file.name.replace(/\s+/g, "_")}`;
+    const fileExt = file.name.split(".").pop();
+    const cleanBase = file.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9]/g, "_").toLowerCase();
+    const path = `products/${Date.now()}_${cleanBase}.${fileExt}`;
     setAddProgress(30);
-    const { data, error } = await supabase.storage.from("collections").upload(path, file, { upsert: true });
-    if (error) throw new Error(error.message);
-    setAddProgress(90);
+
+    const { data, error } = await supabase.storage.from("collections").upload(path, file, {
+      cacheControl: "3600",
+      upsert: true,
+    });
+
+    if (error) {
+      if (error.message?.toLowerCase().includes("bucket not found") || error.statusCode === "404" || error.status === 404) {
+        throw new Error("Storage bucket 'collections' does not exist yet. Run the supabase_storage_setup.sql query in Supabase SQL editor.");
+      }
+      throw new Error(error.message);
+    }
+
+    setAddProgress(85);
     const { data: { publicUrl } } = supabase.storage.from("collections").getPublicUrl(data.path);
     setAddProgress(100);
     return publicUrl;
   }
 
   async function handleAddImage() {
+    setUploadError("");
     if (addMode === "url") {
       if (!addUrl.trim()) return;
       setImgs(prev => [...prev, addUrl.trim()]);
       setAddUrl("");
       setShowAdd(false);
     } else {
-      if (!addFile) return;
+      if (!addFile) {
+        setUploadError("Please choose or drop an image file first.");
+        return;
+      }
       try {
         const url = await uploadImage(addFile);
         setImgs(prev => [...prev, url]);
@@ -476,7 +513,8 @@ function CollectionForm({ editItem, onSave, onClose }) {
         setAddProgress(0);
         setShowAdd(false);
       } catch (err) {
-        alert("Upload error: " + err.message);
+        setUploadError(err.message);
+        setAddProgress(0);
       }
     }
   }
@@ -490,6 +528,10 @@ function CollectionForm({ editItem, onSave, onClose }) {
       alert("Error saving: " + err.message);
     }
     setSaving(false);
+  }
+
+  function setCover(index) {
+    setImgs(prev => [prev[index], ...prev.filter((_, j) => j !== index)]);
   }
 
   return (
@@ -508,9 +550,20 @@ function CollectionForm({ editItem, onSave, onClose }) {
             <div className="adm-imgs-grid">
               {imgs.map((url, i) => (
                 <div className="adm-imgs-item" key={i}>
-                  {i === 0 && <span className="adm-imgs-cover">Cover</span>}
+                  {i === 0 ? (
+                    <span className="adm-imgs-cover">Cover</span>
+                  ) : (
+                    <button
+                      type="button"
+                      className="adm-imgs-make-cover"
+                      title="Set as Cover"
+                      onClick={() => setCover(i)}
+                    >
+                      Make Cover
+                    </button>
+                  )}
                   <img src={url} alt="" className="adm-imgs-thumb" onError={e => e.target.style.opacity = "0.3"} />
-                  <button type="button" className="adm-imgs-rm" onClick={() => setImgs(prev => prev.filter((_, j) => j !== i))}>×</button>
+                  <button type="button" className="adm-imgs-rm" onClick={() => setImgs(prev => prev.filter((_, j) => j !== i))} title="Remove image">×</button>
                 </div>
               ))}
               {!showAdd && (
@@ -524,9 +577,10 @@ function CollectionForm({ editItem, onSave, onClose }) {
           {(imgs.length === 0 || showAdd) && (
             <div className="adm-add-img-box">
               <div className="adm-img-toggle">
-                <button type="button" className={addMode === "url" ? "on" : ""} onClick={() => setAddMode("url")}>Paste URL</button>
-                <button type="button" className={addMode === "upload" ? "on" : ""} onClick={() => setAddMode("upload")}>Upload File</button>
+                <button type="button" className={addMode === "upload" ? "on" : ""} onClick={() => { setAddMode("upload"); setUploadError(""); }}>Upload File</button>
+                <button type="button" className={addMode === "url" ? "on" : ""} onClick={() => { setAddMode("url"); setUploadError(""); }}>Paste URL</button>
               </div>
+
               {addMode === "url" ? (
                 <div className="adm-field">
                   <input className="adm-input" placeholder="https://..." value={addUrl}
@@ -535,31 +589,47 @@ function CollectionForm({ editItem, onSave, onClose }) {
                 </div>
               ) : (
                 <div className="adm-field">
-                  <div className="adm-dropzone">
+                  <div
+                    className={`adm-dropzone${isDragging ? " dragging" : ""}`}
+                    onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
+                    onDragLeave={() => setIsDragging(false)}
+                    onDrop={handleDrop}
+                  >
                     <input ref={fileRef} type="file" accept="image/*" onChange={handleAddFileChange} />
-                    {addPreview
-                      ? <img src={addPreview} style={{ width: "100%", height: 150, objectFit: "cover", borderRadius: 5 }} alt="" />
-                      : <div className="adm-dropzone-text">{Ico.upload}<br /><b>Click to upload</b> or drag image here</div>
-                    }
+                    {addPreview ? (
+                      <div style={{ position: "relative" }}>
+                        <img src={addPreview} style={{ width: "100%", height: 160, objectFit: "cover", borderRadius: 5 }} alt="" />
+                        <div style={{ fontSize: "11px", color: "#64748b", marginTop: "6px" }}>Click to replace file</div>
+                      </div>
+                    ) : (
+                      <div className="adm-dropzone-text">{Ico.upload}<br /><b>Click to upload</b> or drag image here</div>
+                    )}
                   </div>
                   {addProgress > 0 && addProgress < 100 && (
                     <div className="adm-prog"><div className="adm-prog-bar" style={{ width: `${addProgress}%` }} /></div>
                   )}
                 </div>
               )}
-              <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
+
+              {uploadError && (
+                <div style={{ fontSize: "12px", color: "#ef4444", marginTop: "6px", lineHeight: "1.5" }}>
+                  ⚠ {uploadError}
+                </div>
+              )}
+
+              <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
                 <button type="button" className="adm-btn adm-btn-gold adm-btn-sm" onClick={handleAddImage}>
                   {addMode === "upload" && addFile ? "Upload & Add" : "Add Image"}
                 </button>
                 {imgs.length > 0 && (
                   <button type="button" className="adm-btn adm-btn-white adm-btn-sm"
-                    onClick={() => { setShowAdd(false); setAddUrl(""); setAddFile(null); setAddPreview(null); setAddProgress(0); }}>
+                    onClick={() => { setShowAdd(false); setAddUrl(""); setAddFile(null); setAddPreview(null); setAddProgress(0); setUploadError(""); }}>
                     Cancel
                   </button>
                 )}
               </div>
-              <div className="adm-img-hint" style={{ marginTop: 6 }}>
-                Requires a public <strong>Collection</strong> bucket in Supabase Storage.
+              <div className="adm-img-hint" style={{ marginTop: 8 }}>
+                Uploads directly to your public <strong>collections</strong> bucket in Supabase Storage.
               </div>
             </div>
           )}
