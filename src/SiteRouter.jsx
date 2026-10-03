@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import { supabase } from "./supabase";
 
 const AdminPage = lazy(() => import("./pages/AdminPage"));
@@ -533,6 +533,193 @@ function AuthModal({ mode, onClose, onSuccess }) {
   );
 }
 
+/* ── VIEWING REQUEST MODAL ───────────────────────────────── */
+function ViewingRequestModal({ item, user, onClose }) {
+  const pieceName = typeof item === "object" ? item.name : (item || "General Atelier Viewing");
+  const pieceCat = typeof item === "object" ? item.cat : "Luxury Piece";
+  const pieceImg = typeof item === "object" ? (item.img || item.imgs?.[0]) : null;
+
+  const [location, setLocation] = useState("Manila BGC Atelier");
+  const [preferredDate, setPreferredDate] = useState("");
+  const [timeSlot, setTimeSlot] = useState("Afternoon (2:00 PM – 5:00 PM)");
+  const [notes, setNotes] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [err, setErr] = useState("");
+
+  const tomorrowStr = useMemo(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().split("T")[0];
+  }, []);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setLoading(true);
+    setErr("");
+
+    const details = [
+      `Location: ${location}`,
+      preferredDate ? `Date: ${preferredDate}` : null,
+      `Time Slot: ${timeSlot}`,
+      notes.trim() ? `Notes: ${notes.trim()}` : null
+    ].filter(Boolean).join(" | ");
+
+    const { error } = await supabase.from("viewing_requests").insert([{
+      user_email: user.email,
+      collection_name: pieceName,
+      message: details,
+      status: "pending",
+      created_at: new Date().toISOString(),
+    }]);
+
+    setLoading(false);
+    if (error) {
+      setErr("Failed to submit request. Please try again or reach out to our concierge.");
+    } else {
+      setSubmitted(true);
+    }
+  }
+
+  return (
+    <div className="auth-overlay" onClick={onClose}>
+      <div className="auth-card" style={{ maxWidth: "460px" }} onClick={e => e.stopPropagation()}>
+        <div className="auth-brand">Tiffany &amp; Cris</div>
+        <div className="auth-hint">Private Atelier Viewing</div>
+
+        {/* Piece Preview Card */}
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "14px",
+          padding: "12px",
+          background: "rgba(197, 156, 85, 0.08)",
+          border: "1px solid rgba(197, 156, 85, 0.25)",
+          borderRadius: "6px",
+          marginBottom: "20px"
+        }}>
+          {pieceImg && (
+            <img
+              src={pieceImg}
+              alt={pieceName}
+              style={{ width: "52px", height: "52px", objectFit: "cover", borderRadius: "4px" }}
+            />
+          )}
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: "8.5px", letterSpacing: "0.25em", textTransform: "uppercase", color: "#c59c55" }}>
+              {pieceCat}
+            </div>
+            <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "19px", color: "inherit", fontWeight: 500 }}>
+              {pieceName}
+            </div>
+          </div>
+        </div>
+
+        {!submitted ? (
+          <form onSubmit={handleSubmit}>
+            <label className="auth-label">Atelier Location</label>
+            <select
+              className="auth-input ct-select"
+              value={location}
+              onChange={e => setLocation(e.target.value)}
+              style={{ cursor: "pointer" }}
+            >
+              <option value="Manila BGC Atelier">Manila BGC Atelier (By Appointment)</option>
+              <option value="Virtual Video Consultation">Virtual Video Consultation</option>
+            </select>
+
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+              <div>
+                <label className="auth-label">Preferred Date</label>
+                <input
+                  type="date"
+                  className="auth-input"
+                  min={tomorrowStr}
+                  value={preferredDate}
+                  onChange={e => setPreferredDate(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <label className="auth-label">Time Window</label>
+                <select
+                  className="auth-input ct-select"
+                  value={timeSlot}
+                  onChange={e => setTimeSlot(e.target.value)}
+                  style={{ cursor: "pointer" }}
+                >
+                  <option value="Morning (10:00 AM – 1:00 PM)">Morning (10 AM – 1 PM)</option>
+                  <option value="Afternoon (2:00 PM – 5:00 PM)">Afternoon (2 PM – 5 PM)</option>
+                  <option value="Evening (6:00 PM – 8:00 PM)">Evening (6 PM – 8 PM)</option>
+                </select>
+              </div>
+            </div>
+
+            <label className="auth-label">Special Requests / Notes (Optional)</label>
+            <textarea
+              className="auth-input"
+              rows={2}
+              placeholder="e.g. Specific hardware preference, anniversary celebration..."
+              value={notes}
+              onChange={e => setNotes(e.target.value)}
+              style={{ resize: "none", height: "65px", paddingTop: "8px" }}
+            />
+
+            {err && <div className="auth-err">{err}</div>}
+
+            <button className="auth-submit" disabled={loading}>
+              {loading ? "Submitting..." : "Confirm Viewing Request"}
+            </button>
+
+            <div style={{ textAlign: "center", marginTop: "14px" }}>
+              <button type="button" className="auth-back" onClick={onClose}>
+                Cancel
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div style={{ textAlign: "center", padding: "12px 0 6px" }}>
+            <div style={{
+              width: "48px",
+              height: "48px",
+              borderRadius: "50%",
+              border: "1px solid #c59c55",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 16px"
+            }}>
+              <svg viewBox="0 0 24 24" fill="none" width="22" height="22">
+                <path d="M5 12 L10 17 L19 7" stroke="#c59c55" strokeWidth="1.8" fill="none" strokeLinecap="round" />
+              </svg>
+            </div>
+            <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "24px", fontWeight: 400, color: "inherit", marginBottom: "8px" }}>
+              Viewing Requested
+            </h3>
+            <p style={{ fontSize: "12px", lineHeight: "1.7", color: "#94a3b8", marginBottom: "22px", fontFamily: "'Montserrat', sans-serif" }}>
+              Thank you, our private concierge will reach out to <strong style={{ color: "#c59c55" }}>{user.email}</strong> within 24 hours to confirm your reservation and arrange private access details.
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              <a
+                href="https://www.facebook.com/tiffanyandcris"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-secondary"
+                style={{ textAlign: "center", textDecoration: "none", display: "block", fontSize: "9px" }}
+              >
+                Connect on Facebook Messenger →
+              </a>
+              <button className="btn-primary" onClick={onClose} style={{ fontSize: "9px" }}>
+                Done
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 
 function Navbar({ page, setPage, theme, toggleTheme, user, onAuthOpen, onSignOut, onOpenLegal }) {
   const [scrolled, setScrolled] = useState(false);
@@ -605,6 +792,7 @@ export default function SiteRouter() {
   const [user, setUser] = useState(null);
   const [wishlistIds, setWishlistIds] = useState(new Set());
   const [authModal, setAuthModal] = useState(null);
+  const [viewingRequestItem, setViewingRequestItem] = useState(null);
   const isAdmin = window.location.search.includes("admin");
 
   useEffect(() => {
@@ -700,16 +888,12 @@ export default function SiteRouter() {
     }
   }
 
-  async function handleViewingRequest(collectionName) {
-    if (!user) { setAuthModal("signin"); return; }
-    await supabase.from("viewing_requests").insert([{
-      user_email: user.email,
-      collection_name: collectionName || "General Viewing",
-      message: "",
-      status: "pending",
-      created_at: new Date().toISOString(),
-    }]);
-    window.open("https://www.facebook.com/tiffanyandcris", "_blank");
+  function handleViewingRequest(item) {
+    if (!user) {
+      setAuthModal("signin");
+      return;
+    }
+    setViewingRequestItem(item || "General Atelier Viewing");
   }
 
   if (isAdmin) {
@@ -774,6 +958,14 @@ export default function SiteRouter() {
       </main>
 
       <Footer setPage={setPage} onOpenLegal={handleOpenLegal} theme={theme} />
+
+      {viewingRequestItem && user && (
+        <ViewingRequestModal
+          item={viewingRequestItem}
+          user={user}
+          onClose={() => setViewingRequestItem(null)}
+        />
+      )}
 
       {authModal && (
         <AuthModal mode={authModal} onClose={() => setAuthModal(null)} onSuccess={() => setAuthModal(null)} />
